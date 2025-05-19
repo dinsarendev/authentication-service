@@ -12,6 +12,6 @@ public class OpenApiConfig {
 
     @Bean
     public OpenAPI customOpenAPI() {
-        return new OpenAPI().info(new Info().title("Identity Management User").version("1.0.0").description("This is a sample Spring Boot REST API with OpenAPI documentation").contact(new Contact().name("Din Saren").email("cambofreelance@gmail.com").url("https://cambofreelance.com")).license(new License().name("Cambofreelance 1.0").url("https://cambofreelance.com")));
+        return new OpenAPI().info(new Info().title("Authentication Service").version("1.0.0").description("This is a sample Spring Boot REST API with OpenAPI documentation").contact(new Contact().name("Din Saren").email("cambofreelance@gmail.com").url("https://cambofreelance.com")).license(new License().name("Cambofreelance 1.0").url("https://cambofreelance.com")));
     }
 }

@@ -62,4 +62,6 @@ public final class Constants {
     public static final String PLAY_ID = "PLAY_ID";
     public static final String APPLICATION_TYPE = "Application-Type";
     public static final String ROLE_USER = "User";
+    public static final String PASSWORD = "password";
+    public static final String REFRESH_TOKEN = "refresh_token";
 }
