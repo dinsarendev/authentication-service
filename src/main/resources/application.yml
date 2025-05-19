@@ -1,0 +1,13 @@
+spring:
+  config:
+    import: "optional:configserver:http://localhost:8081/"
+  application:
+    name: authentication
+  profiles:
+    active: uat
+  cloud:
+    compatibility-verifier:
+      enabled: false
+logging:
+  level:
+    org.springframework.cloud.config: DEBUG

@@ -1,0 +1,17 @@
+package com.cambofreelance.authenticationservice.configs;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class OpenApiConfig {
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+        return new OpenAPI().info(new Info().title("Identity Management User").version("1.0.0").description("This is a sample Spring Boot REST API with OpenAPI documentation").contact(new Contact().name("Din Saren").email("cambofreelance@gmail.com").url("https://cambofreelance.com")).license(new License().name("Cambofreelance 1.0").url("https://cambofreelance.com")));
+    }
+}

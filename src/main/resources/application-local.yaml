@@ -1,0 +1,55 @@
+server:
+  port: 2512
+
+spring:
+  application:
+    name: idm-user-service
+  datasource:
+    password: Cambo@1234
+    url: jdbc:postgresql://194.233.91.140:5499/cambo_freelance_db
+    username: cambo_freelance_user
+  jpa:
+#    hibernate:
+    #      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  data:
+    redis:
+      host: 194.233.91.140
+      port: 6379
+      timeout: 30000
+      ssl:
+        enabled: false
+
+  spring:
+    zipkin:
+      base-url: http://194.233.91.140:9411
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId},%X{spanId}]"
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+  upload:
+    client:
+      path: /image/**
+    server:
+      path: /opt/cambofreelance/upload/images/
+
+springdoc:
+  api-docs:
+    path: /openapi/v3/api-docs
+  packagesToScan: com.cambofreelance.idmservice.controllers
+  pathsToMatch: /**
+  swagger-ui:
+    path: /openapi/swagger-ui.html
+
+
+authentication:
+  jwtExpiration: 300000
+  jwtRefreshExpiration: 86400000
+  jwtSecret: ebe8910a-08c0-11ed-861d-0242ac120002

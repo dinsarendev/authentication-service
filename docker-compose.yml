@@ -1,0 +1,7 @@
+version: '3'
+services:
+  authentication-service:
+    build: .
+    ports:
+      - "2512:2512"
+    restart: always
