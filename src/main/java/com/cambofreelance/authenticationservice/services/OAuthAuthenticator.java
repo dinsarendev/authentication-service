@@ -7,7 +7,6 @@ import com.cambofreelance.authenticationservice.dto.response.OAuthResponse;
 import com.cambofreelance.authenticationservice.exceptions.AppException;
 import com.cambofreelance.authenticationservice.models.RefreshToken;
 import com.cambofreelance.authenticationservice.models.User;
-import com.cambofreelance.authenticationservice.repository.UserRepository;
 import com.cambofreelance.authenticationservice.utils.JwtUtils;
 import java.util.Date;
 import java.util.List;
@@ -44,7 +43,8 @@ public class OAuthAuthenticator {
 
       String accessToken = jwtUtils.generateJwtToken(checkUser.getUserId(),
           dateTokenAccessExpiredIn);
-      RefreshToken refreshToken = refreshTokenService.createRefreshToken(checkUser.getId());
+      RefreshToken refreshToken = refreshTokenService.createRefreshToken(checkUser.getId(),
+          request.getDeviceId(), Constants.STATUS_ACTIVE);
       response.setToken(accessToken);
       response.setTokenType(request.getGrantType());
       response.setExpiresIn(dateTokenAccessExpiredIn);
@@ -52,8 +52,8 @@ public class OAuthAuthenticator {
 
     } else if (request.getGrantType().equals(Constants.REFRESH_TOKEN)) {
       log.info("Creating token for refresh token: {}", request.getRefreshToken());
-      RefreshToken checkRefreshToken = refreshTokenService.findByToken(request.getRefreshToken())
-          .orElse(null);
+      RefreshToken checkRefreshToken = refreshTokenService.getRefreshToken(
+          request.getRefreshToken());
       if (checkRefreshToken == null) {
         throw new AppException(ErrorCode.UNAUTHORIZED, "Refresh token not found");
       }
@@ -68,8 +68,6 @@ public class OAuthAuthenticator {
       throw new AppException(ErrorCode.BAD_REQUEST, "Refresh token not found");
     }
     response.setTokenType(Constants.BEARER);
-    response.setCode("200");
-    response.setMessage("Success");
     List<String> scope = List.of("read", "write");
     response.setScope(scope);
     return response;

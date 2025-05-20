@@ -33,4 +33,10 @@ public class RefreshToken {
     @Column(nullable = false)
     private Instant expiryDate;
 
+    @Column(nullable = false)
+    private String status;
+
+    @Column(nullable = false)
+    private String deviceId;
+
 }

@@ -1,9 +1,11 @@
 package com.cambofreelance.authenticationservice.controllers;
 
 import com.cambofreelance.authenticationservice.constants.Constants;
+import com.cambofreelance.authenticationservice.constants.ErrorCode;
 import com.cambofreelance.authenticationservice.dto.request.OAuthRequest;
 import com.cambofreelance.authenticationservice.dto.response.OAuthResponse;
 import com.cambofreelance.authenticationservice.exceptions.AppException;
+import com.cambofreelance.authenticationservice.exceptions.MessageResponse;
 import com.cambofreelance.authenticationservice.services.OAuthAuthenticator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,10 +29,12 @@ public class AuthController extends BaseController {
   public ResponseEntity<Object> oauthToken(@RequestBody OAuthRequest request,
       @RequestHeader(value = Constants.CLIENT_LANG, required = false) String userLang) {
     try {
+      messageResponse = new MessageResponse();
       log.info("Request for token is {}", request);
       OAuthResponse response = authenticator.createToken(request);
+      messageResponse.setSuccess(response, ErrorCode.SUCCESS, userLang);
       log.info("Response for token is {}", response);
-      return new ResponseEntity<>(response, HttpStatus.OK);
+      return new ResponseEntity<>(messageResponse, HttpStatus.OK);
     } catch (AppException e) {
       log.error("Error request token", e);
       return new ResponseEntity<>(e.getResponseMessage(userLang), e.getHttpStatus());

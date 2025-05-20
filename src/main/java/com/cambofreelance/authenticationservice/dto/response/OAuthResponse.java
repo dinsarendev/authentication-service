@@ -24,9 +24,5 @@ public class OAuthResponse {
   private String tokenType;
   @JsonProperty("scope")
   private List<String> scope;
-  @JsonProperty("code")
-  private String code;
-  @JsonProperty("message")
-  private String message;
 
 }

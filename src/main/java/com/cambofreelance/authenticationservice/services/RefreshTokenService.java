@@ -1,5 +1,6 @@
 package com.cambofreelance.authenticationservice.services;
 
+import com.cambofreelance.authenticationservice.constants.Constants;
 import com.cambofreelance.authenticationservice.exceptions.TokenRefreshException;
 import com.cambofreelance.authenticationservice.models.RefreshToken;
 import com.cambofreelance.authenticationservice.models.User;
@@ -37,13 +38,34 @@ public class RefreshTokenService {
         return refreshToken;
     }
 
+  public RefreshToken createRefreshToken(Long userId, String deviceId, String status) {
+    RefreshToken refreshToken = refreshTokenRepository.findByUser_IdAndDeviceIdAndStatus(userId,
+            deviceId, status)
+        .orElse(null);
+    if (refreshToken == null) {
+      refreshToken = new RefreshToken();
+      refreshToken.setUser(userRepository.findById(userId).orElse(new User()));
+      refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
+      refreshToken.setToken(UUID.randomUUID().toString());
+      refreshToken.setDeviceId(deviceId);
+      refreshToken.setStatus(Constants.STATUS_ACTIVE);
+      refreshToken = refreshTokenRepository.save(refreshToken);
+      return refreshToken;
+    }
+    return refreshToken;
+  }
+
+  public RefreshToken getRefreshToken(String token) {
+    return refreshTokenRepository.findByTokenAndStatus(token, Constants.STATUS_ACTIVE)
+        .orElse(null);
+  }
+
     public RefreshToken verifyExpiration(RefreshToken token) {
         if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
             refreshTokenRepository.delete(token);
             throw new TokenRefreshException(token.getToken(),
                 "Refresh token was expired. Please make a new signin request");
         }
-
         return token;
     }
 

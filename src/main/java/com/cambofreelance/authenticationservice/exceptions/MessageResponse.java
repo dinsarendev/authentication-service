@@ -115,6 +115,28 @@ public class MessageResponse implements Serializable {
         }
     }
 
+  public void setSuccess(Object data, String errorCode, String lang) {
+    try {
+      ResponseCode responseCode = ResponseManagerCache.getRespCode(errorCode);
+      if (responseCode == null) {
+        responseCode = ResponseManagerCache.getRespCode(ErrorCode.SUCCESS);
+      }
+      if (StringUtils.hasLength(lang)) {
+        this.setError(responseCode, lang);
+      } else {
+        this.setError(responseCode);
+      }
+      if (null != data) {
+        this.setData(data);
+      }
+    } catch (Exception e) {
+      this.setData(data);
+      this.setCode(ErrorCode.SUCCESS);
+      this.setSuccess(Constants.SUCCESS);
+      this.setError(new ResponseCode());
+    }
+  }
+
     public void setSuccess(Object data) {
         responseCode = ResponseManagerCache.getRespCode(ErrorCode.SUCCESS);
         this.setError(responseCode);
