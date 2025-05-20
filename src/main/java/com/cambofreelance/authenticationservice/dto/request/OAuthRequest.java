@@ -3,12 +3,18 @@ package com.cambofreelance.authenticationservice.dto.request;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
 @JsonInclude(value= Include.NON_NULL)
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class OAuthRequest {
   @JsonProperty("client_secret")
   private String clientSecret;
