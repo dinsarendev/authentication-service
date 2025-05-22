@@ -41,7 +41,7 @@ public class OAuthAuthenticator {
         throw new AppException(ErrorCode.UNAUTHORIZED, "User not found");
       }
 
-      String accessToken = jwtUtils.generateJwtToken(checkUser.getUserId(),
+      String accessToken = jwtUtils.generateJwtToken(checkUser,
           dateTokenAccessExpiredIn);
       RefreshToken refreshToken = refreshTokenService.createRefreshToken(checkUser.getId(),
           request.getDeviceId(), Constants.STATUS_ACTIVE);
@@ -57,7 +57,7 @@ public class OAuthAuthenticator {
       if (checkRefreshToken == null) {
         throw new AppException(ErrorCode.UNAUTHORIZED, "Refresh token not found");
       }
-      String accessToken = jwtUtils.generateJwtToken(checkRefreshToken.getUser().getUserId(),
+      String accessToken = jwtUtils.generateJwtToken(checkRefreshToken.getUser(),
           dateTokenAccessExpiredIn);
       response.setToken(accessToken);
       response.setTokenType(request.getGrantType());
