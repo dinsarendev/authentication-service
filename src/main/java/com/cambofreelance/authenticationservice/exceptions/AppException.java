@@ -1,6 +1,6 @@
 package com.cambofreelance.authenticationservice.exceptions;
 
-import com.cambofreelance.authenticationservice.caches.ResponseManagerCache;
+import com.cambofreelance.authenticationservice.caches.ResponseCodeRedisCache;
 import com.cambofreelance.authenticationservice.constants.Constants;
 import com.cambofreelance.authenticationservice.constants.ErrorCode;
 import com.cambofreelance.authenticationservice.models.ResponseCode;
@@ -83,9 +83,9 @@ public class AppException extends Exception {
 
     public MessageResponse getResponseMessage(Object dataObj, String userLang) {
         ResponseCode responseCode = this.checkMessageResponseCodeValue();
-        String messageEn = ResponseManagerCache.getRespCode(errorCode).getMessage();
-        String messageKh = ResponseManagerCache.getRespCode(errorCode).getMessageKh();
-        String msgCn = ResponseManagerCache.getRespCode(errorCode).getMessageCn();
+        String messageEn = ResponseCodeRedisCache.getRespCode(errorCode).getMessage();
+        String messageKh = ResponseCodeRedisCache.getRespCode(errorCode).getMessageKh();
+        String msgCn = ResponseCodeRedisCache.getRespCode(errorCode).getMessageCn();
 
         if (params != null) {
             for (int i = 0; i < params.length; i++) {
@@ -125,9 +125,9 @@ public class AppException extends Exception {
 
         ResponseCode responseCode = this.checkMessageResponseCodeValue();
 
-        String messageEn = ResponseManagerCache.getRespCode(errorCode).getMessage();
-        String messageKh = ResponseManagerCache.getRespCode(errorCode).getMessageKh();
-        String messageCn = ResponseManagerCache.getRespCode(errorCode).getMessageCn();
+        String messageEn = ResponseCodeRedisCache.getRespCode(errorCode).getMessage();
+        String messageKh = ResponseCodeRedisCache.getRespCode(errorCode).getMessageKh();
+        String messageCn = ResponseCodeRedisCache.getRespCode(errorCode).getMessageCn();
 
         if (params != null) {
             for (int i = 0; i < params.length; i++) {
@@ -153,7 +153,6 @@ public class AppException extends Exception {
     }
 
     public MessageResponse getResponseMessages() {
-
         ResponseCode responseCode = this.checkMessageResponseCodeValue();
         MessageResponse response = new MessageResponse();
         response.setError(responseCode);
@@ -164,9 +163,9 @@ public class AppException extends Exception {
         if (this.errorCode == null) {
             this.errorCode = ErrorCode.GENERAL_ERROR;
         }
-        ResponseCode responseCode = ResponseManagerCache.getRespCode(this.errorCode);
+        ResponseCode responseCode = ResponseCodeRedisCache.getRespCode(this.errorCode);
         if (responseCode == null) {
-            responseCode = ResponseManagerCache.getRespCode(ErrorCode.GENERAL_ERROR);
+            responseCode = ResponseCodeRedisCache.getRespCode(ErrorCode.GENERAL_ERROR);
         }
         if (responseCode.getHttpStatus() != null) {
             this.httpStatus = HttpStatus.valueOf(Integer.parseInt(responseCode.getHttpStatus()));

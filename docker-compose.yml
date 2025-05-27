@@ -1,16 +1,12 @@
 version: '3'
 services:
   authentication-service:
+    container_name: authentication-service
     build: .
     ports:
       - "2512:2512"
-    depends_on:
-      - msa-config-server
-      - report-service
-      - user-service
     networks:
       - cf-network
-
 networks:
   cf-network:
     external: true

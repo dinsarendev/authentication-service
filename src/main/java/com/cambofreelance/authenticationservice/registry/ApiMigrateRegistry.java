@@ -1,6 +1,6 @@
 package com.cambofreelance.authenticationservice.registry;
 
-import com.cambofreelance.authenticationservice.caches.ResponseManagerCache;
+import com.cambofreelance.authenticationservice.caches.ResponseCodeRedisCache;
 import com.cambofreelance.authenticationservice.constants.Constants;
 import com.cambofreelance.authenticationservice.models.ResponseCode;
 import com.cambofreelance.authenticationservice.repository.ResponseCodeRepository;
@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ApiMigrateRegistry {
     private final ResponseCodeRepository responseCodeRepository;
+    private final ResponseCodeRedisCache responseCodeRedisCache;
 
     public void loadComponent() {
         log.info("Loading component ...");
@@ -21,11 +22,11 @@ public class ApiMigrateRegistry {
     }
 
     private void loadResponseCode() {
-        log.info("loading response code ...");
+        log.info("loading response code in redis ...");
         List<ResponseCode> responseCodeList = responseCodeRepository.findByStatus(Constants.STATUS_ACTIVE);
-        log.info("{} response code loaded successfully", responseCodeList);
-        ResponseManagerCache.initRespCodeCache(responseCodeList);
-        log.info("finish response code ...");
+        log.info("{} response code loaded successfully in redis", responseCodeList);
+        responseCodeRedisCache.initRespCodeCache(responseCodeList);
+        log.info("finish response code ... in redis");
     }
 
 }
