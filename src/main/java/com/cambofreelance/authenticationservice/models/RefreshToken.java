@@ -5,10 +5,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import java.time.Instant;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -18,25 +18,22 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class RefreshToken {
+public class RefreshToken extends BaseEntity {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
-    @OneToOne
-    @JoinColumn(name = "USER_ID", referencedColumnName = "ID")
-    private User user;
-
-    @Column(nullable = false, unique = true)
-    private String token;
-
-    @Column(nullable = false)
-    private Instant expiryDate;
-
-    @Column(nullable = false)
-    private String status;
-
-    @Column(nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID")
+    private Integer id;
+    @Column(name = "REFRESH_TOKEN")
+    private String refreshToken;
+    @Column(name = "EXPIRE_ON")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date expiredOn;
+    @Column(name = "DEVICE_ID")
     private String deviceId;
+    @Column(name = "USER_ID")
+    private Long userId;
+    @Column(name = "CLIENT_ID")
+    private String clientId;
 
 }

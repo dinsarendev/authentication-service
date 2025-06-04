@@ -18,5 +18,5 @@ public class UserCreateRequest extends BaseRequest {
     private String email;
     private String password;
     private String applicationType;
-    private String role;
+  private String userType;
 }

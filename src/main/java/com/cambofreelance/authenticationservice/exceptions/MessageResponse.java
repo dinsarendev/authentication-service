@@ -3,7 +3,7 @@ package com.cambofreelance.authenticationservice.exceptions;
 import com.cambofreelance.authenticationservice.caches.ResponseCodeRedisCache;
 import com.cambofreelance.authenticationservice.constants.Constants;
 import com.cambofreelance.authenticationservice.constants.ErrorCode;
-import com.cambofreelance.authenticationservice.models.ResponseCode;
+import com.cambofreelance.authenticationservice.dto.ResponseCodeDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -27,11 +27,11 @@ public class MessageResponse implements Serializable {
   private Object pending;
   private Object metaData;
   @JsonIgnore
-  private ResponseCode responseCode;
+  private ResponseCodeDto responseCode;
 
   public static MessageResponse invalidRequest() {
     MessageResponse m = new MessageResponse();
-    ResponseCode responseCode = ResponseCodeRedisCache.getRespCode(ErrorCode.INVALID_REQ_ERROR);
+    ResponseCodeDto responseCode = ResponseCodeRedisCache.getRespCode(ErrorCode.INVALID_REQ_ERROR);
     m.setError(responseCode);
     return m;
   }
@@ -53,17 +53,17 @@ public class MessageResponse implements Serializable {
     this.data = new ArrayList<>();
   }
 
-  public void setError(ResponseCode responseCode) {
+  public void setError(ResponseCodeDto responseCode) {
     setError(responseCode, new ArrayList<>());
   }
 
-  public void setError(ResponseCode responseCode, Object obj) {
+  public void setError(ResponseCodeDto responseCode, Object obj) {
     this.code = responseCode.getCode();
     this.message = responseCode.getMessage();
     this.data = obj;
   }
 
-  public void setError(ResponseCode responseCode, String lang) {
+  public void setError(ResponseCodeDto responseCode, String lang) {
     this.code = responseCode.getCode();
     this.data = new ArrayList<>();
     if (Constants.LANG_KH.equals(lang)) {
@@ -77,7 +77,7 @@ public class MessageResponse implements Serializable {
 
   public void setSuccess(Object data, String lang) {
     try {
-      ResponseCode responseCode = ResponseCodeRedisCache.getRespCode(ErrorCode.SUCCESS);
+      ResponseCodeDto responseCode = ResponseCodeRedisCache.getRespCode(ErrorCode.SUCCESS);
       if (StringUtils.hasLength(lang)) {
         this.setError(responseCode, lang);
       } else {
@@ -90,13 +90,13 @@ public class MessageResponse implements Serializable {
       this.setData(data);
       this.setCode(ErrorCode.SUCCESS);
       this.setSuccess(Constants.SUCCESS);
-      this.setError(new ResponseCode());
+      this.setError(new ResponseCodeDto());
     }
   }
 
   public void setSuccess(String errorCode, String lang) {
     try {
-      ResponseCode responseCode = ResponseCodeRedisCache.getRespCode(errorCode);
+      ResponseCodeDto responseCode = ResponseCodeRedisCache.getRespCode(errorCode);
       if (responseCode == null) {
         responseCode = ResponseCodeRedisCache.getRespCode(ErrorCode.SUCCESS);
       }
@@ -112,13 +112,13 @@ public class MessageResponse implements Serializable {
       this.setData(data);
       this.setCode(ErrorCode.SUCCESS);
       this.setSuccess(Constants.SUCCESS);
-      this.setError(new ResponseCode());
+      this.setError(new ResponseCodeDto());
     }
   }
 
   public void setSuccess(Object data, String errorCode, String lang) {
     try {
-      ResponseCode responseCode = ResponseCodeRedisCache.getRespCode(errorCode);
+      ResponseCodeDto responseCode = ResponseCodeRedisCache.getRespCode(errorCode);
       if (responseCode == null) {
         responseCode = ResponseCodeRedisCache.getRespCode(ErrorCode.SUCCESS);
       }
@@ -134,7 +134,7 @@ public class MessageResponse implements Serializable {
       this.setData(data);
       this.setCode(ErrorCode.SUCCESS);
       this.setSuccess(Constants.SUCCESS);
-      this.setError(new ResponseCode());
+      this.setError(new ResponseCodeDto());
     }
   }
 
@@ -175,7 +175,7 @@ public class MessageResponse implements Serializable {
     return this;
   }
 
-  public void setError(ResponseCode responseCode, Object obj, Object pending) {
+  public void setError(ResponseCodeDto responseCode, Object obj, Object pending) {
     this.code = responseCode.getCode();
     this.message = responseCode.getMessage();
     this.data = obj;

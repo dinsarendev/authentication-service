@@ -48,7 +48,8 @@ public class JwtUtils {
   public String generateTokenFromUser(User user, Date date) {
     return Jwts.builder()
         .setSubject(user.getUserId())
-        .claim(Constants.APPLICATION_TYPE, user.getApplicationType())
+        .claim(Constants.APPLICATION_TYPE, user.getApplicationId())
+        .claim(Constants.USER_TYPE, user.getUserType())
         .setIssuedAt(date)
         .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
         .signWith(getSigningKey())

@@ -64,4 +64,5 @@ public final class Constants {
     public static final String ROLE_USER = "User";
     public static final String PASSWORD = "password";
     public static final String REFRESH_TOKEN = "refresh_token";
+  public static final String USER_TYPE = "User-Type";
 }

@@ -3,7 +3,7 @@ package com.cambofreelance.authenticationservice.exceptions;
 import com.cambofreelance.authenticationservice.caches.ResponseCodeRedisCache;
 import com.cambofreelance.authenticationservice.constants.Constants;
 import com.cambofreelance.authenticationservice.constants.ErrorCode;
-import com.cambofreelance.authenticationservice.models.ResponseCode;
+import com.cambofreelance.authenticationservice.dto.ResponseCodeDto;
 import java.io.Serial;
 import java.util.ArrayList;
 import lombok.Getter;
@@ -75,14 +75,14 @@ public class AppException extends Exception {
     }
 
     public MessageResponse getResponseMessage() {
-        ResponseCode responseCode = this.checkMessageResponseCodeValue();
+        ResponseCodeDto responseCode = this.checkMessageResponseCodeValue();
         MessageResponse response = new MessageResponse();
         response.setError(responseCode);
         return response;
     }
 
     public MessageResponse getResponseMessage(Object dataObj, String userLang) {
-        ResponseCode responseCode = this.checkMessageResponseCodeValue();
+        ResponseCodeDto responseCode = this.checkMessageResponseCodeValue();
         String messageEn = ResponseCodeRedisCache.getRespCode(errorCode).getMessage();
         String messageKh = ResponseCodeRedisCache.getRespCode(errorCode).getMessageKh();
         String msgCn = ResponseCodeRedisCache.getRespCode(errorCode).getMessageCn();
@@ -123,7 +123,7 @@ public class AppException extends Exception {
 
     public MessageResponse getResponseMessage(String userLang) {
 
-        ResponseCode responseCode = this.checkMessageResponseCodeValue();
+        ResponseCodeDto responseCode = this.checkMessageResponseCodeValue();
 
         String messageEn = ResponseCodeRedisCache.getRespCode(errorCode).getMessage();
         String messageKh = ResponseCodeRedisCache.getRespCode(errorCode).getMessageKh();
@@ -153,17 +153,17 @@ public class AppException extends Exception {
     }
 
     public MessageResponse getResponseMessages() {
-        ResponseCode responseCode = this.checkMessageResponseCodeValue();
+        ResponseCodeDto responseCode = this.checkMessageResponseCodeValue();
         MessageResponse response = new MessageResponse();
         response.setError(responseCode);
         return response;
     }
 
-    private ResponseCode checkMessageResponseCodeValue() {
+    private ResponseCodeDto checkMessageResponseCodeValue() {
         if (this.errorCode == null) {
             this.errorCode = ErrorCode.GENERAL_ERROR;
         }
-        ResponseCode responseCode = ResponseCodeRedisCache.getRespCode(this.errorCode);
+        ResponseCodeDto responseCode = ResponseCodeRedisCache.getRespCode(this.errorCode);
         if (responseCode == null) {
             responseCode = ResponseCodeRedisCache.getRespCode(ErrorCode.GENERAL_ERROR);
         }

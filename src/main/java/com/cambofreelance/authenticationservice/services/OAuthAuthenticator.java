@@ -30,9 +30,9 @@ public class OAuthAuthenticator {
   public OAuthResponse createToken(OAuthRequest request) throws AppException {
     OAuthResponse response = new OAuthResponse();
     Date dateTokenAccessExpiredIn = new Date();
+    User checkUser = userService.authUser(request);
     if (request.getGrantType().equals(Constants.PASSWORD)) {
       log.info("Creating token for user: {}", request.getUsername());
-      User checkUser = userService.authUser(request);
       if (checkUser == null) {
         throw new AppException(ErrorCode.UNAUTHORIZED, "User not found");
       }
@@ -41,14 +41,13 @@ public class OAuthAuthenticator {
         throw new AppException(ErrorCode.UNAUTHORIZED, "User not found");
       }
 
-      String accessToken = jwtUtils.generateJwtToken(checkUser,
-          dateTokenAccessExpiredIn);
+      String accessToken = jwtUtils.generateJwtToken(checkUser, dateTokenAccessExpiredIn);
       RefreshToken refreshToken = refreshTokenService.createRefreshToken(checkUser.getId(),
           request.getDeviceId(), Constants.STATUS_ACTIVE);
       response.setToken(accessToken);
       response.setTokenType(request.getGrantType());
       response.setExpiresIn(dateTokenAccessExpiredIn);
-      response.setRefreshToken(refreshToken.getToken());
+      response.setRefreshToken(refreshToken.getRefreshToken());
 
     } else if (request.getGrantType().equals(Constants.REFRESH_TOKEN)) {
       log.info("Creating token for refresh token: {}", request.getRefreshToken());
@@ -57,12 +56,12 @@ public class OAuthAuthenticator {
       if (checkRefreshToken == null) {
         throw new AppException(ErrorCode.UNAUTHORIZED, "Refresh token not found");
       }
-      String accessToken = jwtUtils.generateJwtToken(checkRefreshToken.getUser(),
+      String accessToken = jwtUtils.generateJwtToken(checkUser,
           dateTokenAccessExpiredIn);
       response.setToken(accessToken);
       response.setTokenType(request.getGrantType());
       response.setExpiresIn(dateTokenAccessExpiredIn);
-      response.setRefreshToken(checkRefreshToken.getToken());
+      response.setRefreshToken(checkRefreshToken.getRefreshToken());
     } else {
       log.error("Invalid grant type with req: {}", request);
       throw new AppException(ErrorCode.BAD_REQUEST, "Refresh token not found");

@@ -25,6 +25,6 @@ public final class ErrorCode {
     public final static String USERNAME_ALREADY_EXIST = "ERR-0006";
     public final static String EMAIL_ALREADY_EXIST = "ERR-0007";
     public final static String PHONE_ALREADY_EXIST = "ERR-0008";
-    public static final String UNAUTHORIZED = "041";
+  public static final String UNAUTHORIZED = "ERR-0007";
     public static final String LOGIN_SUCCESS = "SUC-006";
 }
