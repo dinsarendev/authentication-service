@@ -36,7 +36,7 @@ WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar app.jar
 
 # Expose application port (adjust if necessary)
-EXPOSE 2511
+EXPOSE 2512
 
 # Print timezone information before starting the app
 RUN echo "Container timezone set to: $(date)"

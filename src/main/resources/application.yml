@@ -1,10 +1,10 @@
 spring:
   config:
-    import: "optional:configserver:http://localhost:8081/"
+    import: "optional:configserver:http://msa-config-server:8081/"
   application:
     name: authentication
   profiles:
-    active: uat
+    active: local
   cloud:
     compatibility-verifier:
       enabled: false
