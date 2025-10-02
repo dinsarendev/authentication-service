@@ -1,18 +1,18 @@
 package com.cambofreelance.authenticationservice.repository;
 
-import com.cambofreelance.authenticationservice.models.RefreshToken;
+import com.cambofreelance.authenticationservice.entities.RefreshTokenEntity;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
+public interface RefreshTokenRepository extends JpaRepository<RefreshTokenEntity, Long> {
 
-  Optional<RefreshToken> findByRefreshToken(String token);
+  Optional<RefreshTokenEntity> findByRefreshToken(String token);
 
-  Optional<RefreshToken> findByUserIdAndDeviceIdAndStatus(Long userId, String deviceId,
+  Optional<RefreshTokenEntity> findByUserIdAndDeviceIdAndStatus(String userId, String deviceId,
       String status);
 
-  Optional<RefreshToken> findByRefreshTokenAndStatus(String token, String status);
+  Optional<RefreshTokenEntity> findByRefreshTokenAndStatus(String token, String status);
 
 }

@@ -1,9 +1,7 @@
-package com.cambofreelance.authenticationservice.models;
+package com.cambofreelance.authenticationservice.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -11,27 +9,22 @@ import jakarta.persistence.TemporalType;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.UUID;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
-@Table(name = "IDM_USER")
+@Table(name = "USERS")
 @Data
 @DynamicUpdate()
 @EqualsAndHashCode(callSuper = false)
-public class User extends BaseEntity implements Serializable {
+public class UserEntity extends BaseEntity implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -3846050144523519426L;
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID")
-    private Long id;
-
     @Column(name = "USER_ID")
-    private String userId = UUID.randomUUID().toString();
+    private String userId;
 
     @Column(name = "USER_NAME")
     private String username;

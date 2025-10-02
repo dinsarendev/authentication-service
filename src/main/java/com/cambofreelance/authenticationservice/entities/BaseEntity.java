@@ -1,4 +1,4 @@
-package com.cambofreelance.authenticationservice.models;
+package com.cambofreelance.authenticationservice.entities;
 
 import com.cambofreelance.authenticationservice.constants.Constants;
 import jakarta.persistence.*;

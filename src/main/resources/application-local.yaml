@@ -3,47 +3,39 @@ server:
 
 spring:
   application:
-    name: idm-user-service
+    name: authentication-service
   datasource:
-    password: Cambo@1234
-    url: jdbc:postgresql://194.233.91.140:5499/cambo_freelance_db
-    username: cambo_freelance_user
+    password: CF@@2025
+    url: jdbc:sqlserver://194.233.91.140:14331;databaseName=DEV_AUTHENTICATION_DB;encrypt=false
+    username: sa
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+
   jpa:
-#    hibernate:
-    #      ddl-auto: update
+    hibernate:
+      ddl-auto: none  # always let Flyway handle schema
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+        dialect: org.hibernate.dialect.SQLServerDialect
+    show-sql: true
 
+    flyway:
+      enabled: true
+      baseline-on-migrate: true
+      locations: classpath:db/migration
   data:
     redis:
-      host: 194.233.91.140
+      host: 62.146.239.183
       port: 6379
       timeout: 30000
+      user: default
+      password: CF@2025
       ssl:
         enabled: false
-
-  spring:
-    zipkin:
-      base-url: http://194.233.91.140:9411
-logging:
-  pattern:
-    level: "%5p [${spring.application.name:},%X{traceId},%X{spanId}]"
-
-  servlet:
-    multipart:
-      max-file-size: 50MB
-      max-request-size: 50MB
-  upload:
-    client:
-      path: /image/**
-    server:
-      path: /opt/cambofreelance/upload/images/
 
 springdoc:
   api-docs:
     path: /openapi/v3/api-docs
-  packagesToScan: com.cambofreelance.idmservice.controllers
+  packagesToScan: com.cambofreelance.authenticationservice.controllers
   pathsToMatch: /**
   swagger-ui:
     path: /openapi/swagger-ui.html
@@ -53,3 +45,46 @@ authentication:
   jwtExpiration: 300000
   jwtRefreshExpiration: 86400000
   jwtSecret: ebe8910a-08c0-11ed-861d-0242ac120002
+
+
+otel:
+  exporter:
+    otlp:
+      endpoint: http://alloy:4317
+      protocol: grpc
+  logs:
+    exporter: none
+  metrics:
+    exporter: none
+  traces:
+    sampler:
+      probability: 1.0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,refresh
+
+logging:
+  enable: true
+  includeRequest: true
+  includeRequestBody: true
+  maskLogKey: maskingKey001,maskingkey001,masking-key-002 # its key is sensitive
+  ignoreDefaultMaskingLogKey: ignoreMaskingKey001,ignoreMasking-key-002
+  includeRequestHeader: true
+  maxRequestBody: 1000 # its value is byte
+  ignoreAntMatches: /abc,/zte-ba/**,/hiding-log # this value just example
+  includeResponse: true
+  includeResponseHeader: true
+  maskResponseHeaderKey: maskingKey001,maskingkey001,masking-key-002 # its key isn't sensitive
+  includeResponseBody: true
+  maxResponseBody: 200 # its value is byte, the log size response
+
+  pattern:
+    level: "%5p [${spring.application.name},%X{traceId},%X{spanId}]"
+    console: "[%d] [%t] %-5level [${spring.application.name},%X{traceId},%X{spanId},%X{activityid}] %logger{36} - %msg%n"
+
+storage:
+  redis:
+    key-response-code: key-response-code-authentication-local

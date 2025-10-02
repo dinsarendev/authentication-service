@@ -4,9 +4,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,15 +12,13 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class OpenApiConfig {
 
-    @Bean
-    public OpenAPI customOpenAPI() {
-        return new OpenAPI().info(new Info().title("Authentication Service").version("1.0.0").description("This is a sample Spring Boot REST API with OpenAPI documentation").contact(new Contact().name("Din Saren").email("cambofreelance@gmail.com").url("https://cambofreelance.com")).license(new License().name("Cambofreelance 1.0").url("https://cambofreelance.com")));
-    }
-
-    @PostConstruct
-    public void generate() {
-        // This method is intentionally left empty
-        log.info("Generating OpenAPI documentation...{}",
-            BCrypt.hashpw("123456", BCrypt.gensalt()));
-    }
+  @Bean
+  public OpenAPI customOpenAPI() {
+    return new OpenAPI().info(new Info()
+        .title("Authentication Server").version("1.0.0")
+        .description("This is a sample Spring Boot REST API with OpenAPI documentation")
+        .contact(new Contact().name("Cambofreelance").email("cambofreelance@gmail.com")
+            .url("https://cambofreelance.com")).license(new License().name("Cambofreelance 1.0")
+            .url("https://cambofreelance.com")));
+  }
 }

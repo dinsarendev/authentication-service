@@ -4,8 +4,7 @@ import com.cambofreelance.authenticationservice.constants.Constants;
 import com.cambofreelance.authenticationservice.constants.ErrorCode;
 import com.cambofreelance.authenticationservice.dto.request.OAuthRequest;
 import com.cambofreelance.authenticationservice.dto.response.OAuthResponse;
-import com.cambofreelance.authenticationservice.exceptions.AppException;
-import com.cambofreelance.authenticationservice.exceptions.MessageResponse;
+import com.cambofreelance.authenticationservice.logger.exceptions.MessageResponse;
 import com.cambofreelance.authenticationservice.services.OAuthAuthenticator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,27 +20,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/oauth")
 @Slf4j
 @RequiredArgsConstructor
-public class AuthController extends BaseController {
+public class AuthController  {
 
   private final OAuthAuthenticator authenticator;
 
   @PostMapping("/token")
   public ResponseEntity<Object> oauthToken(@RequestBody OAuthRequest request,
       @RequestHeader(value = Constants.CLIENT_LANG, required = false) String userLang) {
-    try {
-      messageResponse = new MessageResponse();
       log.info("Request for token is {}", request);
       OAuthResponse response = authenticator.createToken(request);
-      messageResponse.setSuccess(response, ErrorCode.SUCCESS, userLang);
-      log.info("Response for token is {}", response);
+      MessageResponse messageResponse = new MessageResponse(response, ErrorCode.LOGIN_SUCCESS);
       return new ResponseEntity<>(messageResponse, HttpStatus.OK);
-    } catch (AppException e) {
-      log.error("Error request token", e);
-      return new ResponseEntity<>(e.getResponseMessage(userLang), e.getHttpStatus());
-    } catch (Throwable e) {
-      log.info("While get error request token ", e);
-      return new ResponseEntity<>(internalServerError(userLang), HttpStatus.BAD_GATEWAY);
-    }
   }
 
 }

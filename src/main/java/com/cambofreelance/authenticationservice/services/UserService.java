@@ -4,16 +4,16 @@ package com.cambofreelance.authenticationservice.services;
 import com.cambofreelance.authenticationservice.dto.request.BaseRequest;
 import com.cambofreelance.authenticationservice.dto.request.OAuthRequest;
 import com.cambofreelance.authenticationservice.dto.request.UserCreateRequest;
-import com.cambofreelance.authenticationservice.exceptions.AppException;
-import com.cambofreelance.authenticationservice.models.User;
+import com.cambofreelance.authenticationservice.entities.UserEntity;
+import com.cambofreelance.authenticationservice.logger.exceptions.AppException;
 
 public interface UserService {
 
-    User authUser(OAuthRequest authRequest) throws AppException;
+    UserEntity authUser(OAuthRequest authRequest) throws AppException;
 
-    User checkUser(BaseRequest request) throws AppException;
+    UserEntity checkUser(BaseRequest request) throws AppException;
 
-    User createUser(UserCreateRequest request) throws AppException;
+    UserEntity createUser(UserCreateRequest request) throws AppException;
 
-    User updateUser(UserCreateRequest request) throws AppException;
+    UserEntity updateUser(UserCreateRequest request) throws AppException;
 }
