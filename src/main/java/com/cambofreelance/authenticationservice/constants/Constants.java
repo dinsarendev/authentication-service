@@ -33,9 +33,9 @@ public final class Constants {
     public static final String TOKEN_PREFIX = "Bearer";
     public static final String CLIENT_SECRET_HEADER = "Client-Secret";
     public static final String CLIENT_SESSION_HEADER = "Session-Id";
-    public static final String CLIENT_USER_ID = "User-Id";
-    public static final String CLIENT_LANG = "User-Lang";
-    public static final String USER_AGENT = "User-Agent";
+    public static final String CLIENT_USER_ID = "UserEntity-Id";
+    public static final String CLIENT_LANG = "UserEntity-Lang";
+    public static final String USER_AGENT = "UserEntity-Agent";
     public static final String USER_REQUEST_FORWARD = "X-Forwarded-For";
     public static final String COMMISSION = "COMMISSION";
     public static final String KHR = "KHR";
@@ -61,8 +61,8 @@ public final class Constants {
     public static final String PLAY_RESULT = "RESULT";
     public static final String PLAY_ID = "PLAY_ID";
     public static final String APPLICATION_TYPE = "Application-Type";
-    public static final String ROLE_USER = "User";
+    public static final String ROLE_USER = "UserEntity";
     public static final String PASSWORD = "password";
     public static final String REFRESH_TOKEN = "refresh_token";
-  public static final String USER_TYPE = "User-Type";
+  public static final String USER_TYPE = "UserEntity-Type";
 }

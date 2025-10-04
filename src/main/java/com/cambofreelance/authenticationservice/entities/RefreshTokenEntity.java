@@ -1,4 +1,4 @@
-package com.cambofreelance.authenticationservice.models;
+package com.cambofreelance.authenticationservice.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,12 +13,12 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-@Table(name = "IDM_USER_REFRESH_TOKEN")
+@Table(name = "USER_REFRESH_TOKEN")
 @Entity
 @Getter
 @Setter
 @ToString
-public class RefreshToken extends BaseEntity {
+public class RefreshTokenEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,13 +26,15 @@ public class RefreshToken extends BaseEntity {
     private Integer id;
     @Column(name = "REFRESH_TOKEN")
     private String refreshToken;
+    @Column(name = "ACCESS_TOKEN")
+    private String accessToken;
     @Column(name = "EXPIRE_ON")
     @Temporal(TemporalType.TIMESTAMP)
     private Date expiredOn;
     @Column(name = "DEVICE_ID")
     private String deviceId;
     @Column(name = "USER_ID")
-    private Long userId;
+    private String userId;
     @Column(name = "CLIENT_ID")
     private String clientId;
 

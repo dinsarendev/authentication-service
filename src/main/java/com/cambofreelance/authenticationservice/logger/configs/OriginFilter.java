@@ -1,4 +1,4 @@
-package com.cambofreelance.authenticationservice.configs;
+package com.cambofreelance.authenticationservice.logger.configs;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -6,9 +6,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class OriginFilter implements WebMvcConfigurer {
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedMethods("GET", "POST", "PUT", "OPTIONS", "DELETE", "PATCH");
+            .allowedMethods("GET", "POST", "PUT", "OPTIONS", "DELETE", "PATCH");
     }
 }

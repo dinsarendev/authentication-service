@@ -1,7 +1,7 @@
 package com.cambofreelance.authenticationservice.utils;
 
 import com.cambofreelance.authenticationservice.constants.Constants;
-import com.cambofreelance.authenticationservice.models.User;
+import com.cambofreelance.authenticationservice.entities.UserEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -41,15 +41,15 @@ public class JwtUtils {
         .compact();
   }
 
-  public String generateJwtToken(User user, Date date) {
-    return generateTokenFromUser(user, date);
+  public String generateJwtToken(UserEntity userEntity, Date date) {
+    return generateTokenFromUser(userEntity, date);
   }
 
-  public String generateTokenFromUser(User user, Date date) {
+  public String generateTokenFromUser(UserEntity userEntity, Date date) {
     return Jwts.builder()
-        .setSubject(user.getUserId())
-        .claim(Constants.APPLICATION_TYPE, user.getApplicationId())
-        .claim(Constants.USER_TYPE, user.getUserType())
+        .setSubject(userEntity.getUserId())
+        .claim(Constants.APPLICATION_TYPE, userEntity.getApplicationId())
+        .claim(Constants.USER_TYPE, userEntity.getUserType())
         .setIssuedAt(date)
         .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
         .signWith(getSigningKey())
