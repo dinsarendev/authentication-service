@@ -37,7 +37,7 @@ public class RefreshTokenService {
         return refreshTokenEntity;
     }
 
-    public RefreshTokenEntity createRefreshToken(String userId, String deviceId, String status) {
+    public RefreshTokenEntity createRefreshToken(String accessToken, String userId, String deviceId, String status) {
         RefreshTokenEntity refreshTokenEntity = refreshTokenRepository.findByUserIdAndDeviceIdAndStatus(userId,
                 deviceId, status)
             .orElse(null);
@@ -48,6 +48,7 @@ public class RefreshTokenService {
             refreshTokenEntity.setRefreshToken(UUID.randomUUID().toString());
             refreshTokenEntity.setDeviceId(deviceId);
             refreshTokenEntity.setStatus(Constants.STATUS_ACTIVE);
+            refreshTokenEntity.setAccessToken(accessToken);
             refreshTokenEntity = refreshTokenRepository.save(refreshTokenEntity);
             return refreshTokenEntity;
         }

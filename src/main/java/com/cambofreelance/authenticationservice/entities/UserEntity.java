@@ -14,7 +14,7 @@ import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
-@Table(name = "USERS")
+@Table(name = "USERS", schema = "dbo")
 @Data
 @DynamicUpdate()
 @EqualsAndHashCode(callSuper = false)
