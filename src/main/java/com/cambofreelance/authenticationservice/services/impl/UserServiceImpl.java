@@ -12,6 +12,8 @@ import com.cambofreelance.authenticationservice.services.UserService;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,22 +21,22 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
     public UserEntity authUser(OAuthRequest authRequest) throws AppException {
-        UserEntity username = userRepository.findByUsernameAndApplicationIdAndStatus(
-                authRequest.getUsername(), authRequest.getApplicationType(), Constants.STATUS_ACTIVE)
+        UserEntity username = userRepository.findByUsernameAndStatus(
+                authRequest.getUsername(),  Constants.STATUS_ACTIVE)
             .orElse(null);
         if (username == null) {
-            username = userRepository.findByPhoneNumberAndApplicationIdAndStatus(
-                    authRequest.getUsername(), authRequest.getApplicationType(),
+            username = userRepository.findByPhoneNumberAndStatus(
+                    authRequest.getUsername(),
                     Constants.STATUS_ACTIVE)
                 .orElse(null);
         }
         if (username == null) {
-            username = userRepository.findByEmailAndApplicationIdAndStatus(
-                authRequest.getUsername(),
-                authRequest.getApplicationType(), Constants.STATUS_ACTIVE).orElse(null);
+            username = userRepository.findByEmailAndStatus(
+                authRequest.getUsername(),Constants.STATUS_ACTIVE).orElse(null);
         }
         return username;
     }
@@ -48,26 +50,25 @@ public class UserServiceImpl implements UserService {
             return userRepository.findByUserIdAndStatus(request.getUserId(), request.getStatus())
                 .orElse(null);
         }
-        return userRepository.findByUsernameAndApplicationIdAndStatus(request.getUsername(),
-            request.getApplicationType(), request.getStatus()).orElse(null);
+        return userRepository.findByUsernameAndStatus(request.getUsername(),request.getStatus()).orElse(null);
     }
 
     @Override
     public UserEntity createUser(UserCreateRequest request) throws AppException {
-        Optional<UserEntity> checkUserName = userRepository.findByUsernameAndApplicationIdAndStatus(
-            request.getUsername(), request.getApplicationType(), Constants.STATUS_ACTIVE);
+        Optional<UserEntity> checkUserName = userRepository.findByUsernameAndStatus(
+            request.getUsername(), Constants.STATUS_ACTIVE);
         if (checkUserName.isPresent()) {
             throw new AppException(ErrorCode.USERNAME_ALREADY_EXIST, "");
         }
 
-        Optional<UserEntity> checkPhoneNumber = userRepository.findByPhoneNumberAndApplicationIdAndStatus(
-            request.getPhoneNumber(), request.getApplicationType(), Constants.STATUS_ACTIVE);
+        Optional<UserEntity> checkPhoneNumber = userRepository.findByPhoneNumberAndStatus(
+            request.getPhoneNumber(), Constants.STATUS_ACTIVE);
         if (checkPhoneNumber.isPresent()) {
             throw new AppException(ErrorCode.PHONE_ALREADY_EXIST, "");
         }
 
-        Optional<UserEntity> checkEmail = userRepository.findByEmailAndApplicationIdAndStatus(
-            request.getEmail(), request.getApplicationType(), Constants.STATUS_ACTIVE);
+        Optional<UserEntity> checkEmail = userRepository.findByEmailAndStatus(
+            request.getEmail(),  Constants.STATUS_ACTIVE);
         if (checkEmail.isPresent()) {
             throw new AppException(ErrorCode.EMAIL_ALREADY_EXIST, "");
         }
@@ -79,7 +80,7 @@ public class UserServiceImpl implements UserService {
         userEntity.setUserId(UUID.randomUUID().toString());
         userEntity.setEmail(request.getEmail());
         userEntity.setUsername(request.getUsername());
-        userEntity.setPassword(request.getPassword());
+        userEntity.setPassword(Strings.isBlank(request.getPassword()) ? Constants.PASSWORD : bCryptPasswordEncoder.encode(request.getPassword()));
         userEntity.setPhoneNumber(request.getPhoneNumber());
         userEntity.setApplicationId(request.getApplicationType());
         userEntity.setUserType(request.getUserType());
@@ -95,22 +96,22 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.ACCOUNT_NOT_FOUND, "");
         }
 
-        Optional<UserEntity> checkUserName = userRepository.findByUsernameAndApplicationIdAndStatus(
-            request.getUsername(), request.getApplicationType(), Constants.STATUS_ACTIVE);
+        Optional<UserEntity> checkUserName = userRepository.findByUsernameAndStatus(
+            request.getUsername(), Constants.STATUS_ACTIVE);
         if (checkUserName.isPresent() && !checkUser.get().getUserId()
             .equals(checkUserName.get().getUserId())) {
             throw new AppException(ErrorCode.USERNAME_ALREADY_EXIST, "");
         }
 
-        Optional<UserEntity> checkPhoneNumber = userRepository.findByPhoneNumberAndApplicationIdAndStatus(
-            request.getPhoneNumber(), request.getApplicationType(), Constants.STATUS_ACTIVE);
+        Optional<UserEntity> checkPhoneNumber = userRepository.findByPhoneNumberAndStatus(
+            request.getPhoneNumber(), Constants.STATUS_ACTIVE);
         if (checkPhoneNumber.isPresent() && !checkUser.get().getUserId()
             .equals(checkPhoneNumber.get().getUserId())) {
             throw new AppException(ErrorCode.PHONE_ALREADY_EXIST, "Phone is already exist");
         }
 
-        Optional<UserEntity> checkEmail = userRepository.findByEmailAndApplicationIdAndStatus(
-            request.getEmail(), request.getApplicationType(), Constants.STATUS_ACTIVE);
+        Optional<UserEntity> checkEmail = userRepository.findByEmailAndStatus(
+            request.getEmail(), Constants.STATUS_ACTIVE);
         if (checkEmail.isPresent() && !checkUser.get().getUserId()
             .equals(checkEmail.get().getUserId())) {
             throw new AppException(ErrorCode.EMAIL_ALREADY_EXIST, "");

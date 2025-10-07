@@ -1,9 +1,9 @@
 package com.cambofreelance.authenticationservice.constants;
 
 public final class ErrorCode {
-    public final static String SUCCESS = "SUC-000";
-    public final static String GENERAL_ERROR = "ERR-000";
-    public final static String BAD_REQUEST = "ERR-001";
+    public final static String SUCCESS = "SUC-00001";
+    public final static String GENERAL_ERROR = "ERR-00002";
+    public final static String BAD_REQUEST = "ERR-00001";
     public final static String INTERNAL_SERVER_ERROR = "ERR-500";
     public final static String NAME_ALREADY_USE = "ERR-003";
     public final static String USER_NOT_PERMISSION = "ERR-004";
@@ -25,6 +25,6 @@ public final class ErrorCode {
     public final static String USERNAME_ALREADY_EXIST = "ERR-0006";
     public final static String EMAIL_ALREADY_EXIST = "ERR-0007";
     public final static String PHONE_ALREADY_EXIST = "ERR-0008";
-  public static final String UNAUTHORIZED = "ERR-0007";
-    public static final String LOGIN_SUCCESS = "SUC-006";
+  public static final String UNAUTHORIZED = "ERR-00003";
+    public static final String LOGIN_SUCCESS = "ERR-00007";
 }

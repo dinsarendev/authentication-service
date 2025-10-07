@@ -43,6 +43,7 @@ public class OAuthAuthenticator {
 
             String accessToken = jwtUtils.generateJwtToken(checkUserEntity, dateTokenAccessExpiredIn);
             RefreshTokenEntity refreshTokenEntity = refreshTokenService.createRefreshToken(
+                accessToken,
                 checkUserEntity.getUserId(),
                 request.getDeviceId(), Constants.STATUS_ACTIVE);
             response.setToken(accessToken);

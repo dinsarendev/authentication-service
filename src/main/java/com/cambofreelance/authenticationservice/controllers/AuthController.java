@@ -3,9 +3,12 @@ package com.cambofreelance.authenticationservice.controllers;
 import com.cambofreelance.authenticationservice.constants.Constants;
 import com.cambofreelance.authenticationservice.constants.ErrorCode;
 import com.cambofreelance.authenticationservice.dto.request.OAuthRequest;
+import com.cambofreelance.authenticationservice.dto.request.UserCreateRequest;
 import com.cambofreelance.authenticationservice.dto.response.OAuthResponse;
+import com.cambofreelance.authenticationservice.entities.UserEntity;
 import com.cambofreelance.authenticationservice.logger.exceptions.MessageResponse;
 import com.cambofreelance.authenticationservice.services.OAuthAuthenticator;
+import com.cambofreelance.authenticationservice.services.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController  {
 
   private final OAuthAuthenticator authenticator;
+  private final UserService userService;
 
   @PostMapping("/token")
   public ResponseEntity<Object> oauthToken(@RequestBody OAuthRequest request,
@@ -32,5 +36,14 @@ public class AuthController  {
       MessageResponse messageResponse = new MessageResponse(response, ErrorCode.LOGIN_SUCCESS);
       return new ResponseEntity<>(messageResponse, HttpStatus.OK);
   }
+
+    @PostMapping("/register")
+    public ResponseEntity<Object> register(@RequestBody UserCreateRequest request,
+        @RequestHeader(value = Constants.CLIENT_LANG, required = false) String userLang) {
+        log.info("Request for register user {}", request);
+        userService.createUser(request);
+        MessageResponse messageResponse = new MessageResponse("", ErrorCode.LOGIN_SUCCESS);
+        return new ResponseEntity<>(messageResponse, HttpStatus.OK);
+    }
 
 }

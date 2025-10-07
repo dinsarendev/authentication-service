@@ -13,7 +13,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-@Table(name = "USER_REFRESH_TOKEN")
+@Table(name = "USER_REFRESH_TOKENS", schema = "dbo")
 @Entity
 @Getter
 @Setter
