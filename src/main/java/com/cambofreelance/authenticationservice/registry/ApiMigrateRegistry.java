@@ -5,10 +5,20 @@ import com.cambofreelance.authenticationservice.caches.ResponseManagerCache;
 import com.cambofreelance.authenticationservice.constants.Constants;
 import com.cambofreelance.authenticationservice.dto.ResponseCodeDto;
 import com.cambofreelance.authenticationservice.entities.ResponseCodeEntity;
+import com.cambofreelance.authenticationservice.entities.RoleEntity;
+import com.cambofreelance.authenticationservice.entities.UserEntity;
 import com.cambofreelance.authenticationservice.repository.ResponseCodeRepository;
+import com.cambofreelance.authenticationservice.repository.RoleRepository;
+import com.cambofreelance.authenticationservice.repository.UserRepository;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,12 +29,18 @@ public class ApiMigrateRegistry {
 
     private final ResponseCodeRepository responseCodeRepository;
     private final ResponseCodeRedisCache responseCodeRedisCache;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
 
     @Transactional
     public void loadComponentInit() {
         log.info("Loading component ...");
         this.loadResponseCode();
+        log.info("Init Seeding admin user");
+        this.seedUserAdmin();
+        log.info("Seeding admin user completed.");
     }
 
     public void loadResponseCode() {
@@ -54,5 +70,92 @@ public class ApiMigrateRegistry {
         });
         threadLoadResponseCode.start();
     }
+
+
+    private void seedUserAdmin() {
+        // Check user admin exist
+        var roles = roleRepository.findAllByStatus(Constants.STATUS_ACTIVE);
+        if(!roles.isEmpty()) {
+            log.info("No roles found in the system. Please create roles before seeding admin user.");
+        }else{
+            // create roles
+            var superAdminRole = new RoleEntity(
+                UUID.randomUUID().toString(),
+                "ADMIN",
+                "Administrator",
+                "lower_conversion",
+                1,
+                Constants.STATUS_ACTIVE,
+                "Administrator role with full permissions"
+            );
+            roleRepository.save(superAdminRole);
+            var userRole = new RoleEntity(
+                UUID.randomUUID().toString(),
+                "USER",
+                "User",
+                "lower_conversion",
+                2,
+                Constants.STATUS_ACTIVE,
+                "User role with half permissions"
+            );
+            roleRepository.save(userRole);
+
+            var userOwnerRole = new RoleEntity(
+                UUID.randomUUID().toString(),
+                "OWNER_USER",
+                "Owner User",
+                "lower_conversion",
+                3,
+                Constants.STATUS_ACTIVE,
+                "Owner User role with half permissions"
+            );
+            roleRepository.save(userOwnerRole);
+
+            var userEmployeeRole = new RoleEntity(
+                UUID.randomUUID().toString(),
+                "EMPLOYEE_USER",
+                "Employee User",
+                "lower_conversion",
+                4,
+                Constants.STATUS_ACTIVE,
+                "Employee User role with half permissions"
+            );
+            roleRepository.save(userEmployeeRole);
+
+            var userCustomerRole = new RoleEntity(
+                UUID.randomUUID().toString(),
+                "CUSTOMER_USER",
+                "Customer User",
+                "lower_conversion",
+                5,
+                Constants.STATUS_ACTIVE,
+                "Customer User role with half permissions"
+            );
+            roleRepository.save(userCustomerRole);
+        }
+        var adminUserOpt = userRepository.findByUsernameAndStatus("super.admin", Constants.STATUS_ACTIVE);
+        if (adminUserOpt.isPresent()){
+            return;
+        }
+        UserEntity adminUser = new UserEntity();
+        adminUser.setUserId(UUID.randomUUID().toString());
+        adminUser.setUsername("super.admin");
+        adminUser.setPassword(bCryptPasswordEncoder.encode("SuperAdmin@123!@#$"));
+        adminUser.setEmail("super.admin@gmail.com");
+        adminUser.setApplicationId("SYSTEM");
+        adminUser.setPhoneNumber("0962505045");
+        adminUser.setStatus(Constants.STATUS_ACTIVE);
+        adminUser.setIsForceChangePassword("N");
+        adminUser.setInvalidPasswordCount(0);
+        adminUser.setInvalidOtpCount(0);
+        adminUser.setCreatedAt(new Date());
+        adminUser.setCreatedBy("SYSTEM");
+        // Assign all roles to admin user
+        var listRoleEntity = new HashSet<>(roleRepository.findAll());
+        adminUser.setRoles(listRoleEntity);
+        userRepository.save(adminUser);
+        log.info("Seeded default admin user: super.admin / SuperAdmin@123");
+    }
+
 
 }
