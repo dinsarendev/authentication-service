@@ -4,6 +4,7 @@ import com.cambofreelance.authenticationservice.constants.Constants;
 import com.cambofreelance.authenticationservice.constants.ErrorCode;
 import com.cambofreelance.authenticationservice.dto.request.OAuthRequest;
 import com.cambofreelance.authenticationservice.dto.request.UserCreateRequest;
+import com.cambofreelance.authenticationservice.dto.request.UserRegisterRequest;
 import com.cambofreelance.authenticationservice.dto.response.OAuthResponse;
 import com.cambofreelance.authenticationservice.entities.UserEntity;
 import com.cambofreelance.authenticationservice.logger.exceptions.MessageResponse;
@@ -38,10 +39,10 @@ public class AuthController  {
   }
 
     @PostMapping("/register")
-    public ResponseEntity<Object> register(@RequestBody UserCreateRequest request,
+    public ResponseEntity<Object> register(@RequestBody UserRegisterRequest request,
         @RequestHeader(value = Constants.CLIENT_LANG, required = false) String userLang) {
         log.info("Request for register user {}", request);
-        userService.createUser(request);
+        userService.registerUser(request);
         MessageResponse messageResponse = new MessageResponse("", ErrorCode.LOGIN_SUCCESS);
         return new ResponseEntity<>(messageResponse, HttpStatus.OK);
     }

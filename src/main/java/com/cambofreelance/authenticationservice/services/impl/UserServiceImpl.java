@@ -5,6 +5,7 @@ import com.cambofreelance.authenticationservice.constants.ErrorCode;
 import com.cambofreelance.authenticationservice.dto.request.BaseRequest;
 import com.cambofreelance.authenticationservice.dto.request.OAuthRequest;
 import com.cambofreelance.authenticationservice.dto.request.UserCreateRequest;
+import com.cambofreelance.authenticationservice.dto.request.UserRegisterRequest;
 import com.cambofreelance.authenticationservice.entities.UserEntity;
 import com.cambofreelance.authenticationservice.logger.exceptions.AppException;
 import com.cambofreelance.authenticationservice.repository.UserRepository;
@@ -55,19 +56,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserEntity createUser(UserCreateRequest request) throws AppException {
-        Optional<UserEntity> checkUserName = userRepository.findByUsernameAndStatus(
+        var checkUserName = userRepository.findByUsernameAndStatus(
             request.getUsername(), Constants.STATUS_ACTIVE);
         if (checkUserName.isPresent()) {
             throw new AppException(ErrorCode.USERNAME_ALREADY_EXIST, "");
         }
 
-        Optional<UserEntity> checkPhoneNumber = userRepository.findByPhoneNumberAndStatus(
+        var checkPhoneNumber = userRepository.findByPhoneNumberAndStatus(
             request.getPhoneNumber(), Constants.STATUS_ACTIVE);
         if (checkPhoneNumber.isPresent()) {
             throw new AppException(ErrorCode.PHONE_ALREADY_EXIST, "");
         }
 
-        Optional<UserEntity> checkEmail = userRepository.findByEmailAndStatus(
+        var checkEmail = userRepository.findByEmailAndStatus(
             request.getEmail(),  Constants.STATUS_ACTIVE);
         if (checkEmail.isPresent()) {
             throw new AppException(ErrorCode.EMAIL_ALREADY_EXIST, "");
@@ -90,27 +91,27 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserEntity updateUser(UserCreateRequest request) throws AppException {
-        Optional<UserEntity> checkUser = userRepository.findByUserIdAndStatus(request.getUserId(),
+        var checkUser = userRepository.findByUserIdAndStatus(request.getUserId(),
             request.getStatus());
         if (checkUser.isEmpty()) {
             throw new AppException(ErrorCode.ACCOUNT_NOT_FOUND, "");
         }
 
-        Optional<UserEntity> checkUserName = userRepository.findByUsernameAndStatus(
+        var checkUserName = userRepository.findByUsernameAndStatus(
             request.getUsername(), Constants.STATUS_ACTIVE);
         if (checkUserName.isPresent() && !checkUser.get().getUserId()
             .equals(checkUserName.get().getUserId())) {
             throw new AppException(ErrorCode.USERNAME_ALREADY_EXIST, "");
         }
 
-        Optional<UserEntity> checkPhoneNumber = userRepository.findByPhoneNumberAndStatus(
+        var checkPhoneNumber = userRepository.findByPhoneNumberAndStatus(
             request.getPhoneNumber(), Constants.STATUS_ACTIVE);
         if (checkPhoneNumber.isPresent() && !checkUser.get().getUserId()
             .equals(checkPhoneNumber.get().getUserId())) {
             throw new AppException(ErrorCode.PHONE_ALREADY_EXIST, "Phone is already exist");
         }
 
-        Optional<UserEntity> checkEmail = userRepository.findByEmailAndStatus(
+        var checkEmail = userRepository.findByEmailAndStatus(
             request.getEmail(), Constants.STATUS_ACTIVE);
         if (checkEmail.isPresent() && !checkUser.get().getUserId()
             .equals(checkEmail.get().getUserId())) {
@@ -129,6 +130,37 @@ public class UserServiceImpl implements UserService {
         userEntity.setPhoneNumber(request.getPhoneNumber());
         userEntity.setApplicationId(request.getApplicationType());
         userEntity.setUserType(request.getUserType());
+        userRepository.save(userEntity);
+        return userEntity;
+    }
+
+    @Override
+    public UserEntity registerUser(UserRegisterRequest request) throws AppException {
+        var checkUserName = userRepository.findByUsernameAndStatus(request.getUsername(), Constants.STATUS_ACTIVE);
+        if (checkUserName.isPresent()) {
+            throw new AppException(ErrorCode.USERNAME_ALREADY_EXIST, "");
+        }
+
+        var checkPhoneNumber = userRepository.findByPhoneNumberAndStatus(
+            request.getPhoneNumber(), Constants.STATUS_ACTIVE);
+        if (checkPhoneNumber.isPresent()) {
+            throw new AppException(ErrorCode.PHONE_ALREADY_EXIST, "");
+        }
+
+        var checkEmail = userRepository.findByEmailAndStatus(
+            request.getEmail(),  Constants.STATUS_ACTIVE);
+        if (checkEmail.isPresent()) {
+            throw new AppException(ErrorCode.EMAIL_ALREADY_EXIST, "");
+        }
+
+        UserEntity userEntity = new UserEntity();
+        userEntity.setStatus(Constants.STATUS_ACTIVE);
+        userEntity.setUserId(UUID.randomUUID().toString());
+        userEntity.setEmail(request.getEmail());
+        userEntity.setUsername(request.getUsername());
+        userEntity.setPassword(Strings.isBlank(request.getPassword()) ? Constants.PASSWORD : bCryptPasswordEncoder.encode(request.getPassword()));
+        userEntity.setPhoneNumber(request.getPhoneNumber());
+        userEntity.setUserType(Constants.USER);
         userRepository.save(userEntity);
         return userEntity;
     }
