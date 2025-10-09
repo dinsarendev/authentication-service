@@ -22,6 +22,7 @@ spring:
       enabled: true
       baseline-on-migrate: true
       locations: classpath:db/migration
+
   data:
     redis:
       host: 62.146.239.183

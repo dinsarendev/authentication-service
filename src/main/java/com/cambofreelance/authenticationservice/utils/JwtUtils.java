@@ -41,15 +41,18 @@ public class JwtUtils {
         .compact();
   }
 
-  public String generateJwtToken(UserEntity userEntity, Date date) {
-    return generateTokenFromUser(userEntity, date);
+  public String generateJwtToken(UserEntity userEntity, Date date, String deviceId) {
+    return generateTokenFromUser(userEntity, date, deviceId);
   }
 
-  public String generateTokenFromUser(UserEntity userEntity, Date date) {
+  public String generateTokenFromUser(UserEntity userEntity, Date date, String deviceId) {
     return Jwts.builder()
         .setSubject(userEntity.getUserId())
         .claim(Constants.APPLICATION_TYPE, userEntity.getApplicationId())
         .claim(Constants.USER_TYPE, userEntity.getUserType())
+        .claim(Constants.USER_ID, userEntity.getUserId())
+        .claim(Constants.DEVICE_ID,deviceId)
+        .claim(Constants.CLIENT_USER_NAME,userEntity.getUsername())
         .setIssuedAt(date)
         .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
         .signWith(getSigningKey())

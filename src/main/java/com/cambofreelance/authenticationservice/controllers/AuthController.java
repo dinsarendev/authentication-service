@@ -3,10 +3,8 @@ package com.cambofreelance.authenticationservice.controllers;
 import com.cambofreelance.authenticationservice.constants.Constants;
 import com.cambofreelance.authenticationservice.constants.ErrorCode;
 import com.cambofreelance.authenticationservice.dto.request.OAuthRequest;
-import com.cambofreelance.authenticationservice.dto.request.UserCreateRequest;
 import com.cambofreelance.authenticationservice.dto.request.UserRegisterRequest;
 import com.cambofreelance.authenticationservice.dto.response.OAuthResponse;
-import com.cambofreelance.authenticationservice.entities.UserEntity;
 import com.cambofreelance.authenticationservice.logger.exceptions.MessageResponse;
 import com.cambofreelance.authenticationservice.services.OAuthAuthenticator;
 import com.cambofreelance.authenticationservice.services.UserService;
@@ -24,19 +22,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/oauth")
 @Slf4j
 @RequiredArgsConstructor
-public class AuthController  {
+public class AuthController {
 
-  private final OAuthAuthenticator authenticator;
-  private final UserService userService;
+    private final OAuthAuthenticator authenticator;
+    private final UserService userService;
 
-  @PostMapping("/token")
-  public ResponseEntity<Object> oauthToken(@RequestBody OAuthRequest request,
-      @RequestHeader(value = Constants.CLIENT_LANG, required = false) String userLang) {
-      log.info("Request for token is {}", request);
-      OAuthResponse response = authenticator.createToken(request);
-      MessageResponse messageResponse = new MessageResponse(response, ErrorCode.LOGIN_SUCCESS);
-      return new ResponseEntity<>(messageResponse, HttpStatus.OK);
-  }
+    @PostMapping("/token")
+    public ResponseEntity<Object> oauthToken(@RequestBody OAuthRequest request,
+        @RequestHeader(value = Constants.CLIENT_LANG, required = false) String userLang) {
+        log.info("Request for token is {}", request);
+        OAuthResponse response = authenticator.createToken(request);
+        MessageResponse messageResponse = new MessageResponse(response, ErrorCode.LOGIN_SUCCESS);
+        return new ResponseEntity<>(messageResponse, HttpStatus.OK);
+    }
 
     @PostMapping("/register")
     public ResponseEntity<Object> register(@RequestBody UserRegisterRequest request,

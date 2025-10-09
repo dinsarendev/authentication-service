@@ -41,7 +41,7 @@ public class OAuthAuthenticator {
                 throw new AppException(ErrorCode.UNAUTHORIZED, "UserEntity not found");
             }
 
-            String accessToken = jwtUtils.generateJwtToken(checkUserEntity, dateTokenAccessExpiredIn);
+            String accessToken = jwtUtils.generateJwtToken(checkUserEntity, dateTokenAccessExpiredIn, request.getDeviceId());
             RefreshTokenEntity refreshTokenEntity = refreshTokenService.createRefreshToken(
                 accessToken,
                 checkUserEntity.getUserId(),
@@ -59,7 +59,7 @@ public class OAuthAuthenticator {
                 throw new AppException(ErrorCode.UNAUTHORIZED, "Refresh token not found");
             }
             String accessToken = jwtUtils.generateJwtToken(checkUserEntity,
-                dateTokenAccessExpiredIn);
+                dateTokenAccessExpiredIn, request.getDeviceId());
             response.setToken(accessToken);
             response.setTokenType(request.getGrantType());
             response.setExpiresIn(dateTokenAccessExpiredIn);
