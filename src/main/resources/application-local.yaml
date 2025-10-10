@@ -6,7 +6,7 @@ spring:
     name: authentication-service
   datasource:
     password: CF@@2025
-    url: jdbc:sqlserver://194.233.91.140:14331;databaseName=DEV_AUTHENTICATION_DB;encrypt=false
+    url: jdbc:sqlserver://194.233.91.140:14331;databaseName=dev_auth;encrypt=false
     username: sa
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
 

@@ -21,9 +21,8 @@ import lombok.ToString;
 public class RefreshTokenEntity extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
-    private Integer id;
+    private String id;
     @Column(name = "REFRESH_TOKEN")
     private String refreshToken;
     @Column(name = "ACCESS_TOKEN")

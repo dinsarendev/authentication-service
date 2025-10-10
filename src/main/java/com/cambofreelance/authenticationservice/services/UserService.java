@@ -7,6 +7,7 @@ import com.cambofreelance.authenticationservice.dto.request.UserCreateRequest;
 import com.cambofreelance.authenticationservice.dto.request.UserRegisterRequest;
 import com.cambofreelance.authenticationservice.entities.UserEntity;
 import com.cambofreelance.authenticationservice.logger.exceptions.AppException;
+import org.apache.catalina.User;
 
 public interface UserService {
 
@@ -19,4 +20,5 @@ public interface UserService {
     UserEntity updateUser(UserCreateRequest request) throws AppException;
 
     UserEntity registerUser(UserRegisterRequest req) throws AppException;
+    UserEntity getUserById(String userId) throws AppException;
 }

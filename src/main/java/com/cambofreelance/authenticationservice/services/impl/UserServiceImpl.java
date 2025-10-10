@@ -165,4 +165,8 @@ public class UserServiceImpl implements UserService {
         return userEntity;
     }
 
+    @Override
+    public UserEntity getUserById(String userId) throws AppException {
+        return userRepository.findById(userId).orElse(null);
+    }
 }

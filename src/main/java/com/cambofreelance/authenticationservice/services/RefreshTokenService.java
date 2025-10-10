@@ -43,11 +43,14 @@ public class RefreshTokenService {
             .orElse(null);
         if (refreshTokenEntity == null) {
             refreshTokenEntity = new RefreshTokenEntity();
+            refreshTokenEntity.setId(UUID.randomUUID().toString());
             refreshTokenEntity.setUserId(userId);
             refreshTokenEntity.setExpiredOn(Date.from(Instant.now().plusMillis(refreshTokenDurationMs)));
             refreshTokenEntity.setRefreshToken(UUID.randomUUID().toString());
             refreshTokenEntity.setDeviceId(deviceId);
             refreshTokenEntity.setStatus(Constants.STATUS_ACTIVE);
+            refreshTokenEntity.setAccessToken(accessToken);
+            refreshTokenEntity.setClientId("web");
             refreshTokenEntity.setAccessToken(accessToken);
             refreshTokenEntity = refreshTokenRepository.save(refreshTokenEntity);
             return refreshTokenEntity;
