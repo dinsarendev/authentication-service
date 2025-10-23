@@ -3,7 +3,7 @@ package com.cambofreelance.authenticationservice.logger.configs;
 import com.cambofreelance.authenticationservice.logger.contants.enums.AppLoggerMode;
 import com.cambofreelance.authenticationservice.logger.dto.AppLogger;
 import com.cambofreelance.authenticationservice.logger.utils.LoggerUtils;
-import io.opentelemetry.api.trace.Span;
+//import io.opentelemetry.api.trace.Span;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -76,11 +76,11 @@ public class LoggingFilter extends OncePerRequestFilter {
             appLogger.setRemoteAddress(request.getRemoteAddr());
 
             // Bind trace/span IDs into MDC
-            Span currentSpan = Span.current();
-            if (currentSpan != null && currentSpan.getSpanContext().isValid()) {
-                MDC.put("traceId", currentSpan.getSpanContext().getTraceId());
-                MDC.put("spanId", currentSpan.getSpanContext().getSpanId());
-            }
+//            Span currentSpan = Span.current();
+//            if (currentSpan != null && currentSpan.getSpanContext().isValid()) {
+//                MDC.put("traceId", currentSpan.getSpanContext().getTraceId());
+//                MDC.put("spanId", currentSpan.getSpanContext().getSpanId());
+//            }
 
             filterChain.doFilter(requestWrapper, responseWrapper);
 

@@ -6,9 +6,10 @@ import com.cambofreelance.authenticationservice.logger.contants.Constants;
 import com.cambofreelance.authenticationservice.logger.contants.enums.AcceptLanguage;
 import com.cambofreelance.authenticationservice.logger.dto.BaseResponse;
 import com.cambofreelance.authenticationservice.logger.exceptions.MessageResponse;
-import io.opentelemetry.api.trace.Span;
+//import io.opentelemetry.api.trace.Span;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
@@ -39,22 +40,22 @@ public class TraceIdResponseAdvice implements ResponseBodyAdvice<Object> {
                                   @NonNull ServerHttpRequest request,
                                   @NonNull ServerHttpResponse response) {
 
-        String traceId = getCurrentTraceId();
+//        String traceId = getCurrentTraceId();
         long timestamp = Instant.now().toEpochMilli();
 
         if (body instanceof BaseResponse<?> apiResponse) {
-            return setTraceAndTimestamp(apiResponse, traceId, timestamp);
+            return setTraceAndTimestamp(apiResponse, UUID.randomUUID().toString(), timestamp);
         } else if (body instanceof MessageResponse messageResponse) {
-            return processMessageResponse(messageResponse, request, traceId, timestamp);
+            return processMessageResponse(messageResponse, request, UUID.randomUUID().toString(), timestamp);
         }
 
         return body;
     }
 
-    private String getCurrentTraceId() {
-        Span span = Span.current();
-        return span.getSpanContext().isValid() ? span.getSpanContext().getTraceId() : null;
-    }
+//    private String getCurrentTraceId() {
+//        Span span = Span.current();
+//        return span.getSpanContext().isValid() ? span.getSpanContext().getTraceId() : null;
+//    }
 
     private BaseResponse<?> setTraceAndTimestamp(BaseResponse<?> response, String traceId, long timestamp) {
         response.setTraceId(traceId);
