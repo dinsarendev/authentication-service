@@ -8,7 +8,7 @@ import lombok.ToString;
 import java.util.Date;
 
 @Entity
-@Table(name = "RESPONSE_CODES", schema = "dbo")
+@Table(name = "RESPONSE_CODES")
 @Getter
 @Setter
 @ToString

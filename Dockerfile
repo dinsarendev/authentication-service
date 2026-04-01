@@ -1,5 +1,5 @@
 # Stage 1: Build the application
-FROM gradle:8.5-jdk17 AS builder
+FROM gradle:8.5-jdk21 AS builder
 
 # Set the working directory
 WORKDIR /app
@@ -23,8 +23,9 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
 # Make the wrapper executable and build the application
 RUN chmod +x ./gradlew && ./gradlew bootJar --no-daemon
 
+
 # Stage 2: Run the application
-FROM openjdk:17-jdk
+FROM eclipse-temurin:21-jdk
 
 # Set timezone in the runtime container too
 ENV TZ=Asia/Phnom_Penh
@@ -36,7 +37,7 @@ WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar app.jar
 
 # Expose application port (adjust if necessary)
-EXPOSE 2512
+EXPOSE 26010
 
 # Print timezone information before starting the app
 RUN echo "Container timezone set to: $(date)"

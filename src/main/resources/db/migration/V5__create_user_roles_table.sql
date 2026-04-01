@@ -1,5 +1,5 @@
-CREATE TABLE dbo.USER_ROLES (
-    USER_ID VARCHAR(36) NOT NULL,
-    ROLE_ID VARCHAR(36) NOT NULL,
-    CONSTRAINT PK_USER_ROLES PRIMARY KEY (USER_ID, ROLE_ID)
+CREATE TABLE if not exists public.user_roles (
+    user_id VARCHAR(36) NOT NULL,
+    role_id VARCHAR(36) NOT NULL,
+    PRIMARY KEY (user_id, role_id)
 );

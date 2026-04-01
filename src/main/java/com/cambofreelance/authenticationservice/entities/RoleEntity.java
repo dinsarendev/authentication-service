@@ -13,7 +13,7 @@ import lombok.Setter;
 import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
-@Table(name = "ROLES", schema = "dbo")
+@Table(name = "ROLES")
 @Getter
 @Setter
 @DynamicUpdate()

@@ -69,5 +69,7 @@ public final class Constants {
     public static final String LANG_CN = "cn";
     public static final String CLIENT_SECRET_HEADER = "Client-Secret";
     public static final String CLIENT_SESSION_HEADER = "Session-Id";
+    public static final String X_FORWARDED_FOR = "X-Forwarded-For";
+    public static final String UNKNOWN = "Unknown";
 
 }

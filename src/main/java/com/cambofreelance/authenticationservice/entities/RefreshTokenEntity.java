@@ -13,7 +13,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-@Table(name = "USER_REFRESH_TOKENS", schema = "dbo")
+@Table(name = "USER_REFRESH_TOKENS")
 @Entity
 @Getter
 @Setter

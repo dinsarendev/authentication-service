@@ -1,23 +1,27 @@
-CREATE TABLE USERS (
-    USER_ID VARCHAR(255) NOT NULL PRIMARY KEY,
-    USER_NAME VARCHAR(255) NOT NULL,
-    PHONE_NUMBER VARCHAR(50) NOT NULL,
-    EMAIL VARCHAR(255) NOT NULL,
-    PASSWORD VARCHAR(255) NOT NULL,
-    APPLICATION_ID VARCHAR(100) NULL,
-    USER_TYPE VARCHAR(50) NULL,
-    REGISTER_CHANNEL VARCHAR(50) NULL,
-    IS_FORCE_CHANGE_PASSWORD VARCHAR(10) NULL,
-    PASSWORD_CHANGE_AT DATETIME2 NULL,
-    INVALID_PASSWORD_COUNT INT NULL,
-    INVALID_PASSWORD_AT DATETIME2 NULL,
-    INVALID_OTP_COUNT INT NULL,
-    INVALID_OTP_AT DATETIME2 NULL,
-    CREATED_BY VARCHAR(255) NOT NULL,
-    CREATED_AT DATETIME2 NOT NULL,
-    UPDATED_BY VARCHAR(255)  NULL,
-    UPDATED_AT DATETIME2  NULL,
-    DELETED_BY VARCHAR(255)  NULL,
-    DELETED_AT DATETIME2  NULL,
-    STATUS NVARCHAR(3) NULL DEFAULT 'ACT'
+CREATE TABLE if not exists public.users (
+    user_id VARCHAR(255) PRIMARY KEY,
+    user_name VARCHAR(255) NOT NULL,
+    phone_number VARCHAR(50) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    application_id VARCHAR(100),
+    user_type VARCHAR(50),
+    register_channel VARCHAR(50),
+    is_force_change_password VARCHAR(10),
+    password_change_at TIMESTAMP,
+    invalid_password_count INTEGER,
+    invalid_password_at TIMESTAMP,
+    invalid_otp_count INTEGER,
+    invalid_otp_at TIMESTAMP,
+    created_by VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by VARCHAR(255),
+    updated_at TIMESTAMP,
+    deleted_by VARCHAR(255),
+    deleted_at TIMESTAMP,
+    status VARCHAR(3) DEFAULT 'ACT'
 );
+
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_phone ON users(phone_number);
+CREATE INDEX idx_users_status ON users(status);

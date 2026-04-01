@@ -4,9 +4,9 @@ services:
     container_name: authentication-service
     build: .
     ports:
-      - "2512:2512"
+      - "26010:26010"
     networks:
-      - cf-network
+      - bbu-network
 networks:
-  cf-network:
+  bbu-network:
     external: true

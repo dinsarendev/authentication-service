@@ -32,9 +32,9 @@ dependencies {
 //    implementation 'io.micrometer:micrometer-tracing-bridge-brave'
 //    implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
 
-    runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc'
-    implementation 'org.flywaydb:flyway-core'
-    implementation 'org.flywaydb:flyway-sqlserver'
+    runtimeOnly 'org.postgresql:postgresql'
+    implementation "org.flywaydb:flyway-core:10.17.0"
+    implementation "org.flywaydb:flyway-database-postgresql:10.17.0"
     implementation 'org.apache.commons:commons-lang3'
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
     implementation 'commons-codec:commons-codec:1.15'
@@ -57,6 +57,8 @@ dependencies {
 //    implementation 'io.opentelemetry:opentelemetry-sdk'
 //    implementation 'io.opentelemetry:opentelemetry-exporter-otlp'
 //    implementation "io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter"
+//    implementation 'org.springframework.boot:spring-boot-starter-security'
+//    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 }
 
 dependencyManagement {
