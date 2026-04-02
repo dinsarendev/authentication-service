@@ -5,7 +5,7 @@ spring:
   application:
     name: authentication-server
   datasource:
-    url: jdbc:postgresql://localhost:26026/dev_authentication_302B_db
+    url: jdbc:postgresql://localhost:26030/dev_authentication_db
     username: postgres
     password: BBU@2026
     driver-class-name: org.postgresql.Driver
