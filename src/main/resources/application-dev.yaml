@@ -5,9 +5,9 @@ spring:
   application:
     name: authentication-server
   datasource:
-    url: jdbc:postgresql://postgres-service-302b-db:5432/dev_authentication_db
-    username: postgres
-    password: BBU@2026
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -97,3 +97,8 @@ app-config:
 applogger:
   enabled: true
   mode: PARTIAL
+
+authentication:
+  jwtExpiration: 300000
+  jwtRefreshExpiration: 86400000
+  jwtSecret: ebe8910a-08c0-11ed-861d-0242ac120002

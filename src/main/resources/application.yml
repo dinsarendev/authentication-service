@@ -2,9 +2,9 @@ spring:
   config:
     import: "optional:configserver:http://msa-config-server:8081/"
   application:
-    name: authentication
+    name: authentication-service
   profiles:
-    active: local
+    active: dev
   cloud:
     compatibility-verifier:
       enabled: false
