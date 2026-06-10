@@ -5,8 +5,12 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 
-@SpringBootApplication(scanBasePackages = "com.cambofreelance.authenticationservice")
+@SpringBootApplication(
+    scanBasePackages = "com.cambofreelance.authenticationservice",
+    exclude = UserDetailsServiceAutoConfiguration.class
+)
 @Slf4j
 public class AuthenticationServiceApplication {
     private final Startup startup;

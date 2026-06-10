@@ -102,36 +102,25 @@ public class ApiMigrateRegistry {
 
             var userOwnerRole = new RoleEntity(
                 UUID.randomUUID().toString(),
-                "OWNER_USER",
-                "Owner User",
+                "CREATOR_USER",
+                "Creator User",
                 "lower_conversion",
                 3,
                 Constants.STATUS_ACTIVE,
-                "Owner User role with half permissions"
+                "Creator User role with half permissions"
             );
             roleRepository.save(userOwnerRole);
 
             var userEmployeeRole = new RoleEntity(
                 UUID.randomUUID().toString(),
-                "EMPLOYEE_USER",
-                "Employee User",
+                "PUBLIC_USER",
+                "Public User",
                 "lower_conversion",
                 4,
                 Constants.STATUS_ACTIVE,
-                "Employee User role with half permissions"
+                "Public User role with half permissions"
             );
             roleRepository.save(userEmployeeRole);
-
-            var userCustomerRole = new RoleEntity(
-                UUID.randomUUID().toString(),
-                "CUSTOMER_USER",
-                "Customer User",
-                "lower_conversion",
-                5,
-                Constants.STATUS_ACTIVE,
-                "Customer User role with half permissions"
-            );
-            roleRepository.save(userCustomerRole);
         }
         var adminUserOpt = userRepository.findByUsernameAndStatus("super.admin", Constants.STATUS_ACTIVE);
         if (adminUserOpt.isPresent()){
@@ -140,7 +129,7 @@ public class ApiMigrateRegistry {
         UserEntity adminUser = new UserEntity();
         adminUser.setUserId(UUID.randomUUID().toString());
         adminUser.setUsername("super.admin");
-        adminUser.setPassword(bCryptPasswordEncoder.encode("SuperAdmin@123!@#$"));
+        adminUser.setPassword(bCryptPasswordEncoder.encode("Admin@123"));
         adminUser.setEmail("super.admin@gmail.com");
         adminUser.setApplicationId("SYSTEM");
         adminUser.setPhoneNumber("0962505045");
@@ -154,7 +143,7 @@ public class ApiMigrateRegistry {
         var listRoleEntity = new HashSet<>(roleRepository.findAll());
         adminUser.setRoles(listRoleEntity);
         userRepository.save(adminUser);
-        log.info("Seeded default admin user: super.admin / SuperAdmin@123");
+        log.info("Seeded default admin user: super.admin / Admin@123");
     }
 
 

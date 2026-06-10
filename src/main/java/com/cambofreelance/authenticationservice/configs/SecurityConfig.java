@@ -1,59 +1,59 @@
-//package com.cambofreelance.authenticationservice.configs;
-//
-//import com.cambofreelance.authenticationservice.filters.AuthTokenFilter;
-//import lombok.RequiredArgsConstructor;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-//import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-//import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-//import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-//import org.springframework.security.config.http.SessionCreationPolicy;
-//import org.springframework.security.web.SecurityFilterChain;
-//import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-//
-//@Configuration
-//@EnableWebSecurity
-//@EnableMethodSecurity
-//@RequiredArgsConstructor
-//public class SecurityConfig {
-//
-//    private final AuthTokenFilter authTokenFilter;
-//    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-//
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http
-//            // Disable CSRF (stateless API)
-//            .csrf(AbstractHttpConfigurer::disable)
-//
-//            // Stateless session (JWT)
-//            .sessionManagement(sm ->
-//                sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//            )
-//
-//            // Authorization rules
-//            .authorizeHttpRequests(auth -> auth
-//                .requestMatchers(
-//                    "/api/public/**",
-//                    "/oauth/**",
-//                    "/openapi/**",
-//                    "/swagger-ui/**",
-//                    "/v3/api-docs/**",
-//                    "/actuator/**",
-//                    "/auth/openapi/swagger-ui.html"
-//                ).permitAll()
-//                .anyRequest().authenticated()
-//            )
-//
-//            // Custom JWT filter
-//            .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
-//
-//            // Exception handling
-//            .exceptionHandling(ex ->
-//                ex.authenticationEntryPoint(customAuthenticationEntryPoint)
-//            );
-//
-//        return http.build();
-//    }
-//}
+package com.cambofreelance.authenticationservice.configs;
+
+import com.cambofreelance.authenticationservice.filters.AuthTokenFilter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
+@RequiredArgsConstructor
+public class SecurityConfig {
+
+    private final AuthTokenFilter authTokenFilter;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    AntPathRequestMatcher.antMatcher("/oauth/token"),
+                    AntPathRequestMatcher.antMatcher("/oauth/register"),
+                    AntPathRequestMatcher.antMatcher("/openapi/**"),
+                    AntPathRequestMatcher.antMatcher("/swagger-ui/**"),
+                    AntPathRequestMatcher.antMatcher("/v3/api-docs/**"),
+                    AntPathRequestMatcher.antMatcher("/actuator/**"),
+                    AntPathRequestMatcher.antMatcher("/auth/openapi/swagger-ui.html")
+                ).permitAll()
+                .anyRequest().authenticated()
+            )
+            .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
+            .exceptionHandling(ex ->
+                ex.authenticationEntryPoint(customAuthenticationEntryPoint)
+            );
+
+        return http.build();
+    }
+
+    // Prevent Spring Boot from auto-registering the filter outside the security chain
+    @Bean
+    public FilterRegistrationBean<AuthTokenFilter> authTokenFilterRegistration(
+        AuthTokenFilter filter) {
+        FilterRegistrationBean<AuthTokenFilter> registration = new FilterRegistrationBean<>(filter);
+        registration.setEnabled(false);
+        return registration;
+    }
+}

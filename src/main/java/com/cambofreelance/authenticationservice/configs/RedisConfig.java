@@ -1,6 +1,7 @@
 package com.cambofreelance.authenticationservice.configs;
 
 import com.cambofreelance.authenticationservice.dto.ResponseCodeDto;
+import com.cambofreelance.authenticationservice.dto.TokenCacheDto;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -99,6 +100,27 @@ public class RedisConfig {
         // Use constructor injection here to avoid deprecated setObjectMapper()
         Jackson2JsonRedisSerializer<ResponseCodeDto> serializer =
             new Jackson2JsonRedisSerializer<>(objectMapper, ResponseCodeDto.class);
+
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(serializer);
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(serializer);
+
+        template.afterPropertiesSet();
+        return template;
+    }
+
+    @Bean("tokenRedisTemplate")
+    public RedisTemplate<String, TokenCacheDto> tokenRedisTemplate(
+        RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, TokenCacheDto> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+
+        objectMapper.findAndRegisterModules();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        Jackson2JsonRedisSerializer<TokenCacheDto> serializer =
+            new Jackson2JsonRedisSerializer<>(objectMapper, TokenCacheDto.class);
 
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(serializer);

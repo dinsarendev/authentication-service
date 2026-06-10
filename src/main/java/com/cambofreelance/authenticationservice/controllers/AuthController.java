@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -37,7 +38,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Object> register(@RequestBody UserRegisterRequest request,
+    public ResponseEntity<Object> register(@Valid @RequestBody UserRegisterRequest request,
         @RequestHeader(value = Constants.CLIENT_LANG, required = false) String userLang) {
         log.info("Request for register user {}", request);
         userService.registerUser(request);
@@ -45,4 +46,17 @@ public class AuthController {
         return new ResponseEntity<>(messageResponse, HttpStatus.OK);
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<Object> logout(
+        @RequestHeader(value = Constants.TOKEN_HEADER) String authorizationHeader,
+        @RequestHeader(value = Constants.USER_ID) String userId,
+        @RequestHeader(value = Constants.DEVICE_ID, required = false) String deviceId) {
+        String accessToken = authorizationHeader.startsWith(Constants.BEARER + " ")
+            ? authorizationHeader.substring(Constants.BEARER.length() + 1)
+            : authorizationHeader;
+        log.info("Logout request for userId={} deviceId={}", userId, deviceId);
+        authenticator.revokeToken(accessToken, userId, deviceId);
+        MessageResponse messageResponse = new MessageResponse("", ErrorCode.LOGIN_SUCCESS);
+        return new ResponseEntity<>(messageResponse, HttpStatus.OK);
+    }
 }
