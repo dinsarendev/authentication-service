@@ -10,6 +10,8 @@ import com.cambofreelance.authenticationservice.dto.response.CdnSettingResponse;
 import com.cambofreelance.authenticationservice.dto.response.CmsGeneralSettingResponse;
 import com.cambofreelance.authenticationservice.dto.response.CmsSeoSettingResponse;
 import com.cambofreelance.authenticationservice.dto.response.IpWhitelistResponse;
+import com.cambofreelance.authenticationservice.dto.response.SitePublicConfigResponse;
+import com.cambofreelance.authenticationservice.dto.response.SiteStatsResponse;
 import com.cambofreelance.authenticationservice.dto.response.StorageSettingResponse;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,4 +35,9 @@ public interface CmsSettingService {
 
     IpWhitelistResponse getIpWhitelistSettings();
     IpWhitelistResponse updateIpWhitelistSettings(IpWhitelistRequest request);
+
+    SiteStatsResponse getStatsSettings();
+    SiteStatsResponse updateStatsSettings(int projectsCompleted, int happyClients, int clientSatisfaction);
+
+    SitePublicConfigResponse getSitePublicConfig();
 }

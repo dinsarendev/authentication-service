@@ -11,6 +11,8 @@ import com.cambofreelance.authenticationservice.dto.response.CdnSettingResponse;
 import com.cambofreelance.authenticationservice.dto.response.CmsGeneralSettingResponse;
 import com.cambofreelance.authenticationservice.dto.response.CmsSeoSettingResponse;
 import com.cambofreelance.authenticationservice.dto.response.IpWhitelistResponse;
+import com.cambofreelance.authenticationservice.dto.response.SitePublicConfigResponse;
+import com.cambofreelance.authenticationservice.dto.response.SiteStatsResponse;
 import com.cambofreelance.authenticationservice.dto.response.StorageSettingResponse;
 import com.cambofreelance.authenticationservice.entities.CmsSettingEntity;
 import com.cambofreelance.authenticationservice.repository.CmsSettingRepository;
@@ -249,6 +251,52 @@ public class CmsSettingServiceImpl implements CmsSettingService {
         upsert("ip_whitelist_rules", rulesValue, SettingGroup.IP_WHITELIST);
         ipWhitelistCache.refresh();
         return getIpWhitelistSettings();
+    }
+
+    // ── Stats ─────────────────────────────────────────────────────────────────
+
+    @Override
+    public SiteStatsResponse getStatsSettings() {
+        Map<String, String> m = loadGroup(SettingGroup.STATS);
+        return SiteStatsResponse.builder()
+            .projectsCompleted(parseInt(m.getOrDefault("stat_projects_completed", "50")))
+            .happyClients(parseInt(m.getOrDefault("stat_happy_clients", "25")))
+            .clientSatisfaction(parseInt(m.getOrDefault("stat_client_satisfaction", "100")))
+            .build();
+    }
+
+    @Override
+    @Transactional
+    public SiteStatsResponse updateStatsSettings(int projectsCompleted, int happyClients, int clientSatisfaction) {
+        upsert("stat_projects_completed", String.valueOf(projectsCompleted), SettingGroup.STATS);
+        upsert("stat_happy_clients",      String.valueOf(happyClients),      SettingGroup.STATS);
+        upsert("stat_client_satisfaction",String.valueOf(clientSatisfaction), SettingGroup.STATS);
+        return getStatsSettings();
+    }
+
+    // ── Public site config ────────────────────────────────────────────────────
+
+    @Override
+    public SitePublicConfigResponse getSitePublicConfig() {
+        Map<String, String> general = loadGroup(SettingGroup.GENERAL);
+        Map<String, String> social  = loadGroup(SettingGroup.SOCIAL);
+        return SitePublicConfigResponse.builder()
+            .siteName(general.getOrDefault("site_name", "Cambo Freelance"))
+            .siteDescription(general.getOrDefault("site_description",
+                "Professional freelance team from Cambodia delivering technology-driven solutions."))
+            .siteLogo(general.getOrDefault("site_logo", ""))
+            .siteAddress(general.getOrDefault("site_address", "Street 123, BKK1, Phnom Penh, Cambodia"))
+            .siteEmail(general.getOrDefault("site_email", "hello@cambofreelance.com"))
+            .sitePhone(general.getOrDefault("site_phone", "+855 (0) 12 345 678"))
+            .socialTwitter(social.getOrDefault("social_twitter", ""))
+            .socialLinkedin(social.getOrDefault("social_linkedin", ""))
+            .socialInstagram(social.getOrDefault("social_instagram", ""))
+            .socialFacebook(social.getOrDefault("social_facebook", ""))
+            .build();
+    }
+
+    private int parseInt(String value) {
+        try { return Integer.parseInt(value.trim()); } catch (Exception e) { return 0; }
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

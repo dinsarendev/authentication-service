@@ -2,6 +2,7 @@ package com.cambofreelance.authenticationservice.controllers;
 
 import com.cambofreelance.authenticationservice.constants.ErrorCode;
 import com.cambofreelance.authenticationservice.dto.request.CdnSettingRequest;
+import com.cambofreelance.authenticationservice.dto.request.SiteStatsRequest;
 import com.cambofreelance.authenticationservice.dto.request.CmsGeneralSettingRequest;
 import com.cambofreelance.authenticationservice.dto.request.CmsSeoSettingRequest;
 import com.cambofreelance.authenticationservice.dto.request.IpWhitelistRequest;
@@ -124,6 +125,33 @@ public class CmsSettingController {
         cmsSettingService.setupStorageCors(origins);
         return new ResponseEntity<>(
             new MessageResponse("CORS rules applied to bucket", ErrorCode.SUCCESS), HttpStatus.OK);
+    }
+
+    // ── Stats (public read, protected write) ──────────────────────────────────
+
+    /** No auth — site name, description, and social links for the public footer. */
+    @GetMapping("/public")
+    public ResponseEntity<Object> getSitePublicConfig() {
+        return new ResponseEntity<>(
+            new MessageResponse(cmsSettingService.getSitePublicConfig(), ErrorCode.SUCCESS), HttpStatus.OK);
+    }
+
+    /** No auth — consumed by the public home page. */
+    @GetMapping("/stats")
+    public ResponseEntity<Object> getStats() {
+        return new ResponseEntity<>(
+            new MessageResponse(cmsSettingService.getStatsSettings(), ErrorCode.SUCCESS), HttpStatus.OK);
+    }
+
+    @PutMapping("/stats")
+    @PreAuthorize("hasAuthority('settings.update')")
+    public ResponseEntity<Object> updateStats(@Valid @RequestBody SiteStatsRequest request) {
+        var result = cmsSettingService.updateStatsSettings(
+            request.getProjectsCompleted(),
+            request.getHappyClients(),
+            request.getClientSatisfaction()
+        );
+        return new ResponseEntity<>(new MessageResponse(result, ErrorCode.SUCCESS), HttpStatus.OK);
     }
 
     // ── IP Whitelist ──────────────────────────────────────────────────────────
