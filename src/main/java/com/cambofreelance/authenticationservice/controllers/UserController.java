@@ -1,6 +1,7 @@
 package com.cambofreelance.authenticationservice.controllers;
 
 import com.cambofreelance.authenticationservice.constants.Constants;
+import com.cambofreelance.authenticationservice.dto.UserPreferencesDto;
 import com.cambofreelance.authenticationservice.dto.request.AdminUserCreateRequest;
 import com.cambofreelance.authenticationservice.dto.request.AdminUserUpdateRequest;
 import com.cambofreelance.authenticationservice.dto.request.ChangePasswordRequest;
@@ -9,6 +10,7 @@ import com.cambofreelance.authenticationservice.dto.request.UserStatusRequest;
 import com.cambofreelance.authenticationservice.logger.contants.ErrorCode;
 import com.cambofreelance.authenticationservice.logger.exceptions.MessageResponse;
 import com.cambofreelance.authenticationservice.services.SessionService;
+import com.cambofreelance.authenticationservice.services.UserPreferenceService;
 import com.cambofreelance.authenticationservice.services.UserService;
 import jakarta.validation.Valid;
 import java.util.Set;
@@ -34,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
     private final UserService userService;
     private final SessionService sessionService;
+    private final UserPreferenceService preferenceService;
 
     // ── User list & roles ────────────────────────────────────────────────────
 
@@ -106,6 +109,25 @@ public class UserController {
             .filter(a -> !a.startsWith("ROLE_"))
             .collect(Collectors.toSet());
         return new ResponseEntity<>(new MessageResponse(codes, ErrorCode.SUCCESS), HttpStatus.OK);
+    }
+
+    // ── Current user preferences ─────────────────────────────────────────────
+
+    @GetMapping("/user/preferences")
+    public ResponseEntity<Object> getMyPreferences(
+        @RequestHeader(value = Constants.USER_ID) String userId
+    ) {
+        var prefs = preferenceService.getPreferences(userId);
+        return new ResponseEntity<>(new MessageResponse(prefs, ErrorCode.SUCCESS), HttpStatus.OK);
+    }
+
+    @PutMapping("/user/preferences")
+    public ResponseEntity<Object> saveMyPreferences(
+        @RequestHeader(value = Constants.USER_ID) String userId,
+        @RequestBody UserPreferencesDto dto
+    ) {
+        var saved = preferenceService.savePreferences(userId, dto);
+        return new ResponseEntity<>(new MessageResponse(saved, ErrorCode.SUCCESS), HttpStatus.OK);
     }
 
     // ── Current user profile ─────────────────────────────────────────────────

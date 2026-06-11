@@ -1,6 +1,5 @@
 package com.cambofreelance.authenticationservice.services.impl;
 
-import com.cambofreelance.authenticationservice.constants.ArticleType;
 import com.cambofreelance.authenticationservice.constants.ArticleWorkflowStatus;
 import com.cambofreelance.authenticationservice.constants.Constants;
 import com.cambofreelance.authenticationservice.dto.request.ArticleCreateRequest;
@@ -35,7 +34,6 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     @Transactional
     public ArticleResponse create(ArticleCreateRequest request, String createdBy) {
-        validateType(request.getType());
 
         String slug = ensureUniqueSlug(generateSlug(request.getTitle()), null);
 
@@ -68,7 +66,6 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     @Transactional
     public ArticleResponse update(String id, ArticleUpdateRequest request, String updatedBy) {
-        validateType(request.getType());
 
         ArticleEntity entity = requireById(id);
 
@@ -204,13 +201,6 @@ public class ArticleServiceImpl implements ArticleService {
         AppException ex = new AppException("ARTICLE_NOT_FOUND", "Article not found: " + field + "=" + value);
         ex.setHttpStatus(HttpStatus.NOT_FOUND);
         return ex;
-    }
-
-    private void validateType(String type) {
-        if (!ArticleType.isValid(type)) {
-            throw new AppException("INVALID_ARTICLE_TYPE",
-                "Invalid article type '" + type + "'. Allowed: NEWS, PROMOTIONS, BLOGS, ANNOUNCEMENTS, SERVICE, TEAM, COURSE, PRODUCTS");
-        }
     }
 
     private void resolveFeaturedImage(ArticleEntity entity, String featuredImageId) {
