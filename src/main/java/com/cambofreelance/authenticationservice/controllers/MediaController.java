@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,8 +28,8 @@ public class MediaController {
 
     private final MediaService mediaService;
 
-    /** Step 1 — request a pre-signed PUT URL for direct upload to Spaces. */
     @PostMapping("/presign")
+    @PreAuthorize("hasAuthority('media.upload')")
     public ResponseEntity<Object> presign(
         @Valid @RequestBody MediaPresignRequest request,
         @RequestHeader(value = Constants.USER_ID, required = false) String userId
@@ -37,14 +38,15 @@ public class MediaController {
         return new ResponseEntity<>(new MessageResponse(result, ErrorCode.SUCCESS), HttpStatus.OK);
     }
 
-    /** Step 2 — confirm after the client has PUT the file to Spaces. */
     @PostMapping("/confirm/{id}")
+    @PreAuthorize("hasAuthority('media.upload')")
     public ResponseEntity<Object> confirm(@PathVariable String id) {
         var result = mediaService.confirmUpload(id);
         return new ResponseEntity<>(new MessageResponse(result, ErrorCode.SUCCESS), HttpStatus.OK);
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('media.view')")
     public ResponseEntity<Object> list(
         @RequestParam(required = false) String mediaType,
         @RequestParam(required = false) String search,
@@ -56,18 +58,20 @@ public class MediaController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('media.view')")
     public ResponseEntity<Object> getById(@PathVariable String id) {
         var result = mediaService.getById(id);
         return new ResponseEntity<>(new MessageResponse(result, ErrorCode.SUCCESS), HttpStatus.OK);
     }
 
-    /** Stream the raw file bytes from DigitalOcean Spaces — suitable for <img src="..."> and direct downloads. */
+    /** Streams raw file bytes — whitelisted in SecurityConfig so no auth required. */
     @GetMapping("/{id}/view")
     public ResponseEntity<byte[]> view(@PathVariable String id) {
         return mediaService.viewFile(id);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('media.delete')")
     public ResponseEntity<Object> delete(@PathVariable String id) {
         mediaService.delete(id);
         return new ResponseEntity<>(

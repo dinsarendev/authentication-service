@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +32,7 @@ public class ArticleController {
     // ── Admin endpoints (require authentication) ──────────────────────────────
 
     @PostMapping("/cms/articles")
+    @PreAuthorize("hasAuthority('articles.create')")
     public ResponseEntity<Object> create(
         @Valid @RequestBody ArticleCreateRequest request,
         @RequestHeader(value = Constants.USER_ID, required = false) String userId
@@ -40,6 +42,7 @@ public class ArticleController {
     }
 
     @PutMapping("/cms/articles/{id}")
+    @PreAuthorize("hasAuthority('articles.update')")
     public ResponseEntity<Object> update(
         @PathVariable String id,
         @Valid @RequestBody ArticleUpdateRequest request,
@@ -50,6 +53,7 @@ public class ArticleController {
     }
 
     @DeleteMapping("/cms/articles/{id}")
+    @PreAuthorize("hasAuthority('articles.delete')")
     public ResponseEntity<Object> delete(@PathVariable String id) {
         articleService.delete(id);
         return new ResponseEntity<>(
@@ -57,6 +61,7 @@ public class ArticleController {
     }
 
     @PostMapping("/cms/articles/{id}/copy")
+    @PreAuthorize("hasAuthority('articles.create')")
     public ResponseEntity<Object> copy(
         @PathVariable String id,
         @RequestHeader(value = Constants.USER_ID, required = false) String userId
@@ -66,6 +71,7 @@ public class ArticleController {
     }
 
     @PutMapping("/cms/articles/{id}/status")
+    @PreAuthorize("hasAuthority('articles.publish')")
     public ResponseEntity<Object> updateStatus(
         @PathVariable String id,
         @Valid @RequestBody ArticleStatusRequest request,
@@ -76,6 +82,7 @@ public class ArticleController {
     }
 
     @GetMapping("/cms/articles")
+    @PreAuthorize("hasAuthority('articles.view')")
     public ResponseEntity<Object> adminList(
         @RequestParam(required = false) String type,
         @RequestParam(required = false) String workflowStatus,
@@ -89,6 +96,7 @@ public class ArticleController {
     }
 
     @GetMapping("/cms/articles/{id}")
+    @PreAuthorize("hasAuthority('articles.view')")
     public ResponseEntity<Object> adminGetById(@PathVariable String id) {
         var result = articleService.getById(id);
         return new ResponseEntity<>(new MessageResponse(result, ErrorCode.SUCCESS), HttpStatus.OK);
@@ -96,7 +104,6 @@ public class ArticleController {
 
     // ── Public endpoints (no authentication required) ─────────────────────────
 
-    /** List published articles — optionally filter by type. */
     @GetMapping("/articles")
     public ResponseEntity<Object> publicList(
         @RequestParam(required = false) String type,

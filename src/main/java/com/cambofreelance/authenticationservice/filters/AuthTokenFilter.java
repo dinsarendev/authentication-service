@@ -56,7 +56,11 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 return;
             }
 
-            var authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+            var authorities = new java.util.ArrayList<org.springframework.security.core.GrantedAuthority>();
+            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+            cached.getPermissions().stream()
+                .map(SimpleGrantedAuthority::new)
+                .forEach(authorities::add);
             var authentication = new UsernamePasswordAuthenticationToken(
                 cached.getUserId(), null, authorities);
             SecurityContextHolder.getContext().setAuthentication(authentication);

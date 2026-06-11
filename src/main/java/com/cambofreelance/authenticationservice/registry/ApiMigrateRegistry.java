@@ -79,48 +79,10 @@ public class ApiMigrateRegistry {
             log.info("No roles found in the system. Please create roles before seeding admin user.");
         }else{
             // create roles
-            var superAdminRole = new RoleEntity(
-                UUID.randomUUID().toString(),
-                "ADMIN",
-                "Administrator",
-                "lower_conversion",
-                1,
-                Constants.STATUS_ACTIVE,
-                "Administrator role with full permissions"
-            );
-            roleRepository.save(superAdminRole);
-            var userRole = new RoleEntity(
-                UUID.randomUUID().toString(),
-                "USER",
-                "User",
-                "lower_conversion",
-                2,
-                Constants.STATUS_ACTIVE,
-                "User role with half permissions"
-            );
-            roleRepository.save(userRole);
-
-            var userOwnerRole = new RoleEntity(
-                UUID.randomUUID().toString(),
-                "CREATOR_USER",
-                "Creator User",
-                "lower_conversion",
-                3,
-                Constants.STATUS_ACTIVE,
-                "Creator User role with half permissions"
-            );
-            roleRepository.save(userOwnerRole);
-
-            var userEmployeeRole = new RoleEntity(
-                UUID.randomUUID().toString(),
-                "PUBLIC_USER",
-                "Public User",
-                "lower_conversion",
-                4,
-                Constants.STATUS_ACTIVE,
-                "Public User role with half permissions"
-            );
-            roleRepository.save(userEmployeeRole);
+            roleRepository.save(buildRole("ADMIN",        "Administrator", "lower_conversion", 1, "Administrator role with full permissions"));
+            roleRepository.save(buildRole("USER",         "User",          "lower_conversion", 2, "User role with limited permissions"));
+            roleRepository.save(buildRole("CREATOR_USER", "Creator User",  "lower_conversion", 3, "Creator User role"));
+            roleRepository.save(buildRole("PUBLIC_USER",  "Public User",   "lower_conversion", 4, "Public User role"));
         }
         var adminUserOpt = userRepository.findByUsernameAndStatus("super.admin", Constants.STATUS_ACTIVE);
         if (adminUserOpt.isPresent()){
@@ -146,5 +108,17 @@ public class ApiMigrateRegistry {
         log.info("Seeded default admin user: super.admin / Admin@123");
     }
 
+    private RoleEntity buildRole(String code, String name, String convention, int level, String description) {
+        RoleEntity role = new RoleEntity();
+        role.setId(UUID.randomUUID().toString());
+        role.setCode(code);
+        role.setName(name);
+        role.setConvention(convention);
+        role.setLevel(level);
+        role.setDescription(description);
+        role.setStatus(Constants.STATUS_ACTIVE);
+        role.setCreatedBy(Constants.SYSTEM);
+        return role;
+    }
 
 }

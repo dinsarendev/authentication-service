@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -35,12 +35,14 @@ public class CmsSettingController {
     // ── General ──────────────────────────────────────────────────────────────
 
     @GetMapping("/general")
+    @PreAuthorize("hasAuthority('settings.view')")
     public ResponseEntity<Object> getGeneralSettings() {
         var result = cmsSettingService.getGeneralSettings();
         return new ResponseEntity<>(new MessageResponse(result, ErrorCode.SUCCESS), HttpStatus.OK);
     }
 
     @PutMapping("/general")
+    @PreAuthorize("hasAuthority('settings.update')")
     public ResponseEntity<Object> updateGeneralSettings(
         @Valid @RequestBody CmsGeneralSettingRequest request
     ) {
@@ -51,6 +53,7 @@ public class CmsSettingController {
     // ── Logo upload ───────────────────────────────────────────────────────────
 
     @PostMapping(value = "/logo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAuthority('settings.update')")
     public ResponseEntity<Object> uploadLogo(@RequestParam("file") MultipartFile file) {
         String logoUrl = cmsSettingService.uploadLogo(file);
         return new ResponseEntity<>(
@@ -62,12 +65,14 @@ public class CmsSettingController {
     // ── SEO ───────────────────────────────────────────────────────────────────
 
     @GetMapping("/seo")
+    @PreAuthorize("hasAuthority('settings.view')")
     public ResponseEntity<Object> getSeoSettings() {
         var result = cmsSettingService.getSeoSettings();
         return new ResponseEntity<>(new MessageResponse(result, ErrorCode.SUCCESS), HttpStatus.OK);
     }
 
     @PutMapping("/seo")
+    @PreAuthorize("hasAuthority('settings.update')")
     public ResponseEntity<Object> updateSeoSettings(
         @Valid @RequestBody CmsSeoSettingRequest request
     ) {
@@ -78,12 +83,14 @@ public class CmsSettingController {
     // ── CDN ───────────────────────────────────────────────────────────────────
 
     @GetMapping("/cdn")
+    @PreAuthorize("hasAuthority('settings.view')")
     public ResponseEntity<Object> getCdnSettings() {
         var result = cmsSettingService.getCdnSettings();
         return new ResponseEntity<>(new MessageResponse(result, ErrorCode.SUCCESS), HttpStatus.OK);
     }
 
     @PutMapping("/cdn")
+    @PreAuthorize("hasAuthority('settings.update')")
     public ResponseEntity<Object> updateCdnSettings(
         @Valid @RequestBody CdnSettingRequest request
     ) {
@@ -94,12 +101,14 @@ public class CmsSettingController {
     // ── Storage ───────────────────────────────────────────────────────────────
 
     @GetMapping("/storage")
+    @PreAuthorize("hasAuthority('settings.view')")
     public ResponseEntity<Object> getStorageSettings() {
         var result = cmsSettingService.getStorageSettings();
         return new ResponseEntity<>(new MessageResponse(result, ErrorCode.SUCCESS), HttpStatus.OK);
     }
 
     @PutMapping("/storage")
+    @PreAuthorize("hasAuthority('settings.update')")
     public ResponseEntity<Object> updateStorageSettings(
         @Valid @RequestBody StorageSettingRequest request
     ) {
@@ -108,6 +117,7 @@ public class CmsSettingController {
     }
 
     @PostMapping("/storage/setup-cors")
+    @PreAuthorize("hasAuthority('settings.update')")
     public ResponseEntity<Object> setupStorageCors(
         @RequestParam(defaultValue = "*") List<String> origins
     ) {
@@ -119,12 +129,16 @@ public class CmsSettingController {
     // ── IP Whitelist ──────────────────────────────────────────────────────────
 
     @GetMapping("/ip-whitelist")
+    @PreAuthorize("hasAuthority('settings.view')")
     public ResponseEntity<Object> getIpWhitelist() {
-        return new ResponseEntity<>(new MessageResponse(cmsSettingService.getIpWhitelistSettings(), ErrorCode.SUCCESS), HttpStatus.OK);
+        return new ResponseEntity<>(
+            new MessageResponse(cmsSettingService.getIpWhitelistSettings(), ErrorCode.SUCCESS), HttpStatus.OK);
     }
 
     @PutMapping("/ip-whitelist")
+    @PreAuthorize("hasAuthority('settings.update')")
     public ResponseEntity<Object> updateIpWhitelist(@RequestBody IpWhitelistRequest request) {
-        return new ResponseEntity<>(new MessageResponse(cmsSettingService.updateIpWhitelistSettings(request), ErrorCode.SUCCESS), HttpStatus.OK);
+        return new ResponseEntity<>(
+            new MessageResponse(cmsSettingService.updateIpWhitelistSettings(request), ErrorCode.SUCCESS), HttpStatus.OK);
     }
 }

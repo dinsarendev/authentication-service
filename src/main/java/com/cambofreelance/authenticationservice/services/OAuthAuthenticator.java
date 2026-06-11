@@ -166,6 +166,7 @@ public class OAuthAuthenticator {
             .applicationId(user.getApplicationId())
             .userType(user.getUserType())
             .status(Constants.STATUS_ACTIVE)
+            .permissions(userService.getPermissionCodes(user.getUserId()))
             .build();
     }
 }

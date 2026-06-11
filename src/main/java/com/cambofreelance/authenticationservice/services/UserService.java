@@ -15,6 +15,7 @@ import com.cambofreelance.authenticationservice.dto.response.UserProfileResponse
 import com.cambofreelance.authenticationservice.entities.UserEntity;
 import com.cambofreelance.authenticationservice.logger.exceptions.AppException;
 import java.util.List;
+import java.util.Set;
 
 public interface UserService {
 
@@ -47,4 +48,6 @@ public interface UserService {
     void adminDeleteUser(String userId) throws AppException;
 
     UserProfileResponse adminUpdateUserStatus(String userId, String status) throws AppException;
+
+    Set<String> getPermissionCodes(String userId);
 }

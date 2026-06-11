@@ -447,4 +447,9 @@ public class UserServiceImpl implements UserService {
         }
         return toProfileResponse(user);
     }
+
+    @Override
+    public Set<String> getPermissionCodes(String userId) {
+        return userRepository.findActivePermissionCodesByUserId(userId);
+    }
 }

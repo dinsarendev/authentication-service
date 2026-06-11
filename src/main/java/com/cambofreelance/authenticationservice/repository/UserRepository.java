@@ -2,8 +2,11 @@ package com.cambofreelance.authenticationservice.repository;
 
 import com.cambofreelance.authenticationservice.entities.UserEntity;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -15,6 +18,11 @@ public interface UserRepository extends JpaRepository<UserEntity, String>, JpaSp
 
     Optional<UserEntity> findByPhoneNumberAndStatus(String phoneNumber, String status);
 
-    Optional<UserEntity> findByEmailAndStatus(String email,
-        String status);
+    Optional<UserEntity> findByEmailAndStatus(String email, String status);
+
+    @Query("SELECT DISTINCT p.code FROM UserEntity u " +
+           "JOIN u.roles r " +
+           "JOIN r.permissions p " +
+           "WHERE u.userId = :userId AND r.status = 'ACT'")
+    Set<String> findActivePermissionCodesByUserId(@Param("userId") String userId);
 }

@@ -11,9 +11,14 @@ import com.cambofreelance.authenticationservice.logger.exceptions.MessageRespons
 import com.cambofreelance.authenticationservice.services.SessionService;
 import com.cambofreelance.authenticationservice.services.UserService;
 import jakarta.validation.Valid;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +38,7 @@ public class UserController {
     // ── User list & roles ────────────────────────────────────────────────────
 
     @GetMapping("/users")
+    @PreAuthorize("hasAuthority('users.view')")
     public ResponseEntity<Object> listUsers(
         @RequestParam(required = false) String search,
         @RequestParam(required = false) String status,
@@ -45,6 +51,7 @@ public class UserController {
     }
 
     @GetMapping("/roles")
+    @PreAuthorize("hasAnyAuthority('users.create', 'users.update', 'roles.view')")
     public ResponseEntity<Object> listRoles() {
         var roles = userService.getAllRoles();
         return new ResponseEntity<>(new MessageResponse(roles, ErrorCode.SUCCESS), HttpStatus.OK);
@@ -53,6 +60,7 @@ public class UserController {
     // ── Admin CRUD ───────────────────────────────────────────────────────────
 
     @PostMapping("/users")
+    @PreAuthorize("hasAuthority('users.create')")
     public ResponseEntity<Object> createUser(
         @Valid @RequestBody AdminUserCreateRequest request
     ) {
@@ -61,6 +69,7 @@ public class UserController {
     }
 
     @PutMapping("/users/{userId}")
+    @PreAuthorize("hasAuthority('users.update')")
     public ResponseEntity<Object> updateUser(
         @PathVariable String userId,
         @Valid @RequestBody AdminUserUpdateRequest request
@@ -70,18 +79,33 @@ public class UserController {
     }
 
     @DeleteMapping("/users/{userId}")
+    @PreAuthorize("hasAuthority('users.delete')")
     public ResponseEntity<Object> deleteUser(@PathVariable String userId) {
         userService.adminDeleteUser(userId);
         return new ResponseEntity<>(new MessageResponse("User deleted successfully", ErrorCode.SUCCESS), HttpStatus.OK);
     }
 
     @PutMapping("/users/{userId}/status")
+    @PreAuthorize("hasAuthority('users.status')")
     public ResponseEntity<Object> updateUserStatus(
         @PathVariable String userId,
         @Valid @RequestBody UserStatusRequest request
     ) {
         var result = userService.adminUpdateUserStatus(userId, request.getStatus());
         return new ResponseEntity<>(new MessageResponse(result, ErrorCode.SUCCESS), HttpStatus.OK);
+    }
+
+    // ── Current user permissions ─────────────────────────────────────────────
+
+    @GetMapping("/user/permissions")
+    public ResponseEntity<Object> getMyPermissions() {
+        Set<String> codes = SecurityContextHolder.getContext()
+            .getAuthentication()
+            .getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .filter(a -> !a.startsWith("ROLE_"))
+            .collect(Collectors.toSet());
+        return new ResponseEntity<>(new MessageResponse(codes, ErrorCode.SUCCESS), HttpStatus.OK);
     }
 
     // ── Current user profile ─────────────────────────────────────────────────
@@ -115,12 +139,14 @@ public class UserController {
     // ── Admin session management ──────────────────────────────────────────────
 
     @GetMapping("/cms/users/{userId}/sessions")
+    @PreAuthorize("hasAuthority('sessions.view')")
     public ResponseEntity<Object> adminGetUserSessions(@PathVariable String userId) {
         var sessions = sessionService.adminGetUserSessions(userId);
         return new ResponseEntity<>(new MessageResponse(sessions, ErrorCode.SUCCESS), HttpStatus.OK);
     }
 
     @DeleteMapping("/cms/users/{userId}/sessions/{sessionId}")
+    @PreAuthorize("hasAuthority('sessions.revoke')")
     public ResponseEntity<Object> adminRevokeSession(
         @PathVariable String userId,
         @PathVariable String sessionId) {
@@ -129,6 +155,7 @@ public class UserController {
     }
 
     @DeleteMapping("/cms/users/{userId}/sessions")
+    @PreAuthorize("hasAuthority('sessions.revoke')")
     public ResponseEntity<Object> adminRevokeAllSessions(@PathVariable String userId) {
         sessionService.adminRevokeAllSessions(userId);
         return new ResponseEntity<>(new MessageResponse("All sessions revoked successfully", ErrorCode.SUCCESS), HttpStatus.OK);
