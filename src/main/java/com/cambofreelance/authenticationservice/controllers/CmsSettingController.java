@@ -1,0 +1,130 @@
+package com.cambofreelance.authenticationservice.controllers;
+
+import com.cambofreelance.authenticationservice.constants.ErrorCode;
+import com.cambofreelance.authenticationservice.dto.request.CdnSettingRequest;
+import com.cambofreelance.authenticationservice.dto.request.CmsGeneralSettingRequest;
+import com.cambofreelance.authenticationservice.dto.request.CmsSeoSettingRequest;
+import com.cambofreelance.authenticationservice.dto.request.IpWhitelistRequest;
+import com.cambofreelance.authenticationservice.dto.request.StorageSettingRequest;
+import com.cambofreelance.authenticationservice.logger.exceptions.MessageResponse;
+import com.cambofreelance.authenticationservice.services.CmsSettingService;
+import jakarta.validation.Valid;
+import java.util.List;
+import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+@RestController
+@RequestMapping("/cms/settings")
+@RequiredArgsConstructor
+public class CmsSettingController {
+
+    private final CmsSettingService cmsSettingService;
+
+    // ── General ──────────────────────────────────────────────────────────────
+
+    @GetMapping("/general")
+    public ResponseEntity<Object> getGeneralSettings() {
+        var result = cmsSettingService.getGeneralSettings();
+        return new ResponseEntity<>(new MessageResponse(result, ErrorCode.SUCCESS), HttpStatus.OK);
+    }
+
+    @PutMapping("/general")
+    public ResponseEntity<Object> updateGeneralSettings(
+        @Valid @RequestBody CmsGeneralSettingRequest request
+    ) {
+        var result = cmsSettingService.updateGeneralSettings(request);
+        return new ResponseEntity<>(new MessageResponse(result, ErrorCode.SUCCESS), HttpStatus.OK);
+    }
+
+    // ── Logo upload ───────────────────────────────────────────────────────────
+
+    @PostMapping(value = "/logo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Object> uploadLogo(@RequestParam("file") MultipartFile file) {
+        String logoUrl = cmsSettingService.uploadLogo(file);
+        return new ResponseEntity<>(
+            new MessageResponse(Map.of("logoUrl", logoUrl), ErrorCode.SUCCESS),
+            HttpStatus.OK
+        );
+    }
+
+    // ── SEO ───────────────────────────────────────────────────────────────────
+
+    @GetMapping("/seo")
+    public ResponseEntity<Object> getSeoSettings() {
+        var result = cmsSettingService.getSeoSettings();
+        return new ResponseEntity<>(new MessageResponse(result, ErrorCode.SUCCESS), HttpStatus.OK);
+    }
+
+    @PutMapping("/seo")
+    public ResponseEntity<Object> updateSeoSettings(
+        @Valid @RequestBody CmsSeoSettingRequest request
+    ) {
+        var result = cmsSettingService.updateSeoSettings(request);
+        return new ResponseEntity<>(new MessageResponse(result, ErrorCode.SUCCESS), HttpStatus.OK);
+    }
+
+    // ── CDN ───────────────────────────────────────────────────────────────────
+
+    @GetMapping("/cdn")
+    public ResponseEntity<Object> getCdnSettings() {
+        var result = cmsSettingService.getCdnSettings();
+        return new ResponseEntity<>(new MessageResponse(result, ErrorCode.SUCCESS), HttpStatus.OK);
+    }
+
+    @PutMapping("/cdn")
+    public ResponseEntity<Object> updateCdnSettings(
+        @Valid @RequestBody CdnSettingRequest request
+    ) {
+        var result = cmsSettingService.updateCdnSettings(request);
+        return new ResponseEntity<>(new MessageResponse(result, ErrorCode.SUCCESS), HttpStatus.OK);
+    }
+
+    // ── Storage ───────────────────────────────────────────────────────────────
+
+    @GetMapping("/storage")
+    public ResponseEntity<Object> getStorageSettings() {
+        var result = cmsSettingService.getStorageSettings();
+        return new ResponseEntity<>(new MessageResponse(result, ErrorCode.SUCCESS), HttpStatus.OK);
+    }
+
+    @PutMapping("/storage")
+    public ResponseEntity<Object> updateStorageSettings(
+        @Valid @RequestBody StorageSettingRequest request
+    ) {
+        var result = cmsSettingService.updateStorageSettings(request);
+        return new ResponseEntity<>(new MessageResponse(result, ErrorCode.SUCCESS), HttpStatus.OK);
+    }
+
+    @PostMapping("/storage/setup-cors")
+    public ResponseEntity<Object> setupStorageCors(
+        @RequestParam(defaultValue = "*") List<String> origins
+    ) {
+        cmsSettingService.setupStorageCors(origins);
+        return new ResponseEntity<>(
+            new MessageResponse("CORS rules applied to bucket", ErrorCode.SUCCESS), HttpStatus.OK);
+    }
+
+    // ── IP Whitelist ──────────────────────────────────────────────────────────
+
+    @GetMapping("/ip-whitelist")
+    public ResponseEntity<Object> getIpWhitelist() {
+        return new ResponseEntity<>(new MessageResponse(cmsSettingService.getIpWhitelistSettings(), ErrorCode.SUCCESS), HttpStatus.OK);
+    }
+
+    @PutMapping("/ip-whitelist")
+    public ResponseEntity<Object> updateIpWhitelist(@RequestBody IpWhitelistRequest request) {
+        return new ResponseEntity<>(new MessageResponse(cmsSettingService.updateIpWhitelistSettings(request), ErrorCode.SUCCESS), HttpStatus.OK);
+    }
+}

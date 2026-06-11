@@ -3,15 +3,21 @@ package com.cambofreelance.authenticationservice.services;
 import com.cambofreelance.authenticationservice.caches.TokenRedisCache;
 import com.cambofreelance.authenticationservice.constants.Constants;
 import com.cambofreelance.authenticationservice.constants.ErrorCode;
+import com.cambofreelance.authenticationservice.dto.SessionMetadataDto;
 import com.cambofreelance.authenticationservice.dto.TokenCacheDto;
 import com.cambofreelance.authenticationservice.dto.request.OAuthRequest;
 import com.cambofreelance.authenticationservice.dto.response.OAuthResponse;
 import com.cambofreelance.authenticationservice.entities.RefreshTokenEntity;
 import com.cambofreelance.authenticationservice.entities.UserEntity;
 import com.cambofreelance.authenticationservice.logger.exceptions.AppException;
+import com.cambofreelance.authenticationservice.repository.RefreshTokenRepository;
 import com.cambofreelance.authenticationservice.utils.JwtUtils;
+import com.cambofreelance.authenticationservice.utils.UserAgentParser;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mindrot.jbcrypt.BCrypt;
@@ -27,6 +33,8 @@ public class OAuthAuthenticator {
     private final TokenRedisCache tokenRedisCache;
     private final JwtUtils jwtUtils;
     private final UserService userService;
+    private final UserAgentParser userAgentParser;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Value("${authentication.jwtExpiration}")
     private long jwtExpirationMs;
@@ -34,7 +42,10 @@ public class OAuthAuthenticator {
     @Value("${authentication.jwtRefreshExpiration}")
     private long jwtRefreshExpirationMs;
 
-    public OAuthResponse createToken(OAuthRequest request) throws AppException {
+    @Value("${session.max-concurrent:5}")
+    private int maxConcurrentSessions;
+
+    public OAuthResponse createToken(OAuthRequest request, HttpServletRequest httpRequest) throws AppException {
         OAuthResponse response = new OAuthResponse();
         Date issuedAt = new Date();
 
@@ -48,9 +59,32 @@ public class OAuthAuthenticator {
                 throw new AppException(ErrorCode.UNAUTHORIZED, "Invalid credentials");
             }
 
+            // New device detection
+            boolean isKnownDevice = refreshTokenRepository.existsByUserIdAndDeviceId(
+                user.getUserId(), request.getDeviceId());
+
+            // Concurrent session control (only for new devices)
+            if (!isKnownDevice) {
+                List<RefreshTokenEntity> activeSessions = refreshTokenRepository
+                    .findAllByUserIdAndStatus(user.getUserId(), Constants.STATUS_ACTIVE);
+                if (activeSessions.size() >= maxConcurrentSessions) {
+                    RefreshTokenEntity oldest = activeSessions.stream()
+                        .min(Comparator.comparing(e -> e.getCreatedAt()))
+                        .orElseThrow();
+                    tokenRedisCache.revokeAccessToken(oldest.getAccessToken());
+                    tokenRedisCache.revokeRefreshToken(oldest.getRefreshToken());
+                    oldest.setStatus(Constants.STATUS_DELETE);
+                    refreshTokenRepository.save(oldest);
+                    log.info("Evicted oldest session for userId={} to enforce max={}", user.getUserId(), maxConcurrentSessions);
+                }
+            }
+
+            // Build metadata
+            SessionMetadataDto metadata = buildSessionMetadata(httpRequest, !isKnownDevice);
+
             String accessToken = jwtUtils.generateJwtToken(user, issuedAt, request.getDeviceId());
             RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(
-                accessToken, user.getUserId(), request.getDeviceId(), Constants.STATUS_ACTIVE, user);
+                accessToken, user.getUserId(), request.getDeviceId(), Constants.STATUS_ACTIVE, user, metadata);
 
             // store access token in Redis with TTL
             TokenCacheDto dto = buildTokenCacheDto(user, request.getDeviceId());
@@ -59,6 +93,7 @@ public class OAuthAuthenticator {
             response.setToken(accessToken);
             response.setRefreshToken(refreshToken.getRefreshToken());
             response.setExpiresIn(issuedAt);
+            response.setNewDevice(!isKnownDevice);
 
         } else if (request.getGrantType().equals(Constants.REFRESH_TOKEN)) {
             log.info("Refreshing token with refresh_token: {}", request.getRefreshToken());
@@ -77,9 +112,11 @@ public class OAuthAuthenticator {
             // revoke the old access token from Redis
             tokenRedisCache.revokeAccessToken(existingRefresh.getAccessToken());
 
+            SessionMetadataDto metadata = buildSessionMetadata(httpRequest, false);
+
             String accessToken = jwtUtils.generateJwtToken(user, issuedAt, request.getDeviceId());
             RefreshTokenEntity newRefresh = refreshTokenService.createRefreshToken(
-                accessToken, user.getUserId(), request.getDeviceId(), Constants.STATUS_ACTIVE, user);
+                accessToken, user.getUserId(), request.getDeviceId(), Constants.STATUS_ACTIVE, user, metadata);
 
             // store new access token in Redis
             TokenCacheDto dto = buildTokenCacheDto(user, request.getDeviceId());
@@ -102,6 +139,23 @@ public class OAuthAuthenticator {
     public void revokeToken(String accessToken, String userId, String deviceId) {
         tokenRedisCache.revokeAccessToken(accessToken);
         refreshTokenService.revokeByUserId(userId, deviceId);
+    }
+
+    private SessionMetadataDto buildSessionMetadata(HttpServletRequest req, boolean isNewDevice) {
+        String ua = req.getHeader("User-Agent");
+        UserAgentParser.ParsedUserAgent parsed = userAgentParser.parse(ua);
+        String ip = Optional.ofNullable(req.getHeader("X-Forwarded-For"))
+            .map(h -> h.split(",")[0].trim())
+            .orElse(req.getRemoteAddr());
+        return SessionMetadataDto.builder()
+            .ipAddress(ip)
+            .userAgent(ua)
+            .browser(parsed.getBrowser())
+            .osName(parsed.getOs())
+            .deviceType(parsed.getDeviceType())
+            .deviceName(parsed.getDeviceName())
+            .newDevice(isNewDevice)
+            .build();
     }
 
     private TokenCacheDto buildTokenCacheDto(UserEntity user, String deviceId) {

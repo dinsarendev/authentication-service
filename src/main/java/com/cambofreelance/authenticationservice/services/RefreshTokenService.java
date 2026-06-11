@@ -2,6 +2,7 @@ package com.cambofreelance.authenticationservice.services;
 
 import com.cambofreelance.authenticationservice.caches.TokenRedisCache;
 import com.cambofreelance.authenticationservice.constants.Constants;
+import com.cambofreelance.authenticationservice.dto.SessionMetadataDto;
 import com.cambofreelance.authenticationservice.dto.TokenCacheDto;
 import com.cambofreelance.authenticationservice.entities.RefreshTokenEntity;
 import com.cambofreelance.authenticationservice.entities.UserEntity;
@@ -9,6 +10,7 @@ import com.cambofreelance.authenticationservice.logger.exceptions.AppException;
 import com.cambofreelance.authenticationservice.repository.RefreshTokenRepository;
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -72,6 +74,58 @@ public class RefreshTokenService {
         return entity;
     }
 
+    public RefreshTokenEntity createRefreshToken(String accessToken, String userId, String deviceId,
+        String status, UserEntity userEntity, SessionMetadataDto metadata) {
+        RefreshTokenEntity entity = refreshTokenRepository
+            .findByUserIdAndDeviceIdAndStatus(userId, deviceId, status)
+            .orElse(null);
+
+        if (entity == null) {
+            entity = new RefreshTokenEntity();
+            entity.setId(UUID.randomUUID().toString());
+            entity.setUserId(userId);
+            entity.setExpiredOn(Date.from(Instant.now().plusMillis(refreshTokenDurationMs)));
+            entity.setRefreshToken(UUID.randomUUID().toString());
+            entity.setDeviceId(deviceId);
+            entity.setStatus(Constants.STATUS_ACTIVE);
+            entity.setAccessToken(accessToken);
+            entity.setClientId("web");
+            if (metadata != null) {
+                entity.setIpAddress(metadata.getIpAddress());
+                entity.setUserAgent(metadata.getUserAgent());
+                entity.setBrowser(metadata.getBrowser());
+                entity.setOsName(metadata.getOsName());
+                entity.setDeviceType(metadata.getDeviceType());
+                entity.setDeviceName(metadata.getDeviceName());
+                entity.setNewDevice(metadata.isNewDevice());
+                entity.setLastActiveAt(new Date());
+            }
+            entity = refreshTokenRepository.save(entity);
+        } else {
+            // rotate: revoke old tokens from Redis then update record
+            tokenRedisCache.revokeAccessToken(entity.getAccessToken());
+            tokenRedisCache.revokeRefreshToken(entity.getRefreshToken());
+            entity.setAccessToken(accessToken);
+            entity.setRefreshToken(UUID.randomUUID().toString());
+            entity.setExpiredOn(Date.from(Instant.now().plusMillis(refreshTokenDurationMs)));
+            entity.setLastActiveAt(new Date());
+            entity.setNewDevice(false);
+            if (metadata != null) {
+                entity.setIpAddress(metadata.getIpAddress());
+                entity.setUserAgent(metadata.getUserAgent());
+                entity.setBrowser(metadata.getBrowser());
+                entity.setOsName(metadata.getOsName());
+                entity.setDeviceType(metadata.getDeviceType());
+                entity.setDeviceName(metadata.getDeviceName());
+            }
+            entity = refreshTokenRepository.save(entity);
+        }
+
+        TokenCacheDto dto = buildTokenCacheDto(userEntity, deviceId);
+        tokenRedisCache.storeRefreshToken(entity.getRefreshToken(), dto, refreshTokenDurationMs);
+        return entity;
+    }
+
     public RefreshTokenEntity getRefreshToken(String token) {
         // fast path: check Redis first
         TokenCacheDto cached = tokenRedisCache.getRefreshToken(token);
@@ -91,6 +145,18 @@ public class RefreshTokenService {
                 "Refresh token was expired. Please make a new signin request");
         }
         return token;
+    }
+
+    public void revokeAllByUserId(String userId) {
+        List<RefreshTokenEntity> sessions = refreshTokenRepository.findAllByUserIdAndStatus(
+            userId, Constants.STATUS_ACTIVE);
+        for (RefreshTokenEntity entity : sessions) {
+            tokenRedisCache.revokeAccessToken(entity.getAccessToken());
+            tokenRedisCache.revokeRefreshToken(entity.getRefreshToken());
+            entity.setStatus(Constants.STATUS_DELETE);
+            refreshTokenRepository.save(entity);
+        }
+        log.info("Revoked all {} session(s) for userId={}", sessions.size(), userId);
     }
 
     public void revokeByUserId(String userId, String deviceId) {

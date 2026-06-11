@@ -37,7 +37,11 @@ spring:
         enabled: false
       repositories:
         enabled: false
-
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 52MB
 otel:
   exporter:
     otlp:
@@ -91,6 +95,15 @@ storage:
   redis:
     key-response-code: cms-response-code
 
+
+cms:
+  upload:
+    dir: uploads/logos
+    base-url: /uploads/logos
+  media:
+    upload-dir: uploads/media
+    base-url: /uploads/media
+
 app-config:
   otp-expired: 120 # OTP expired in 2 min
   otp-limited-generate: 100 # OTP limited generate in 100 time
@@ -101,6 +114,6 @@ applogger:
   mode: PARTIAL
 
 authentication:
-  jwtExpiration: 300000
-  jwtRefreshExpiration: 86400000
+  jwtExpiration: 1800000       # 30 minutes
+  jwtRefreshExpiration: 604800000  # 7 days
   jwtSecret: ebe8910a-08c0-11ed-861d-0242ac120002

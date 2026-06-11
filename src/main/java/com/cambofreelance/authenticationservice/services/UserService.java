@@ -1,13 +1,20 @@
 package com.cambofreelance.authenticationservice.services;
 
 
+import com.cambofreelance.authenticationservice.dto.request.AdminUserCreateRequest;
+import com.cambofreelance.authenticationservice.dto.request.AdminUserUpdateRequest;
 import com.cambofreelance.authenticationservice.dto.request.BaseRequest;
+import com.cambofreelance.authenticationservice.dto.request.ChangePasswordRequest;
 import com.cambofreelance.authenticationservice.dto.request.OAuthRequest;
+import com.cambofreelance.authenticationservice.dto.request.UpdateProfileRequest;
 import com.cambofreelance.authenticationservice.dto.request.UserCreateRequest;
 import com.cambofreelance.authenticationservice.dto.request.UserRegisterRequest;
+import com.cambofreelance.authenticationservice.dto.response.RoleResponse;
+import com.cambofreelance.authenticationservice.dto.response.UserListResponse;
+import com.cambofreelance.authenticationservice.dto.response.UserProfileResponse;
 import com.cambofreelance.authenticationservice.entities.UserEntity;
 import com.cambofreelance.authenticationservice.logger.exceptions.AppException;
-import org.apache.catalina.User;
+import java.util.List;
 
 public interface UserService {
 
@@ -20,5 +27,24 @@ public interface UserService {
     UserEntity updateUser(UserCreateRequest request) throws AppException;
 
     UserEntity registerUser(UserRegisterRequest req) throws AppException;
+
     UserEntity getUserById(String userId) throws AppException;
+
+    UserProfileResponse getUserProfile(String userId) throws AppException;
+
+    void changePassword(String userId, ChangePasswordRequest request) throws AppException;
+
+    UserProfileResponse updateProfile(String userId, UpdateProfileRequest request) throws AppException;
+
+    UserListResponse getUserList(String search, String status, String roleId, int page, int size) throws AppException;
+
+    List<RoleResponse> getAllRoles() throws AppException;
+
+    UserProfileResponse adminCreateUser(AdminUserCreateRequest request) throws AppException;
+
+    UserProfileResponse adminUpdateUser(String userId, AdminUserUpdateRequest request) throws AppException;
+
+    void adminDeleteUser(String userId) throws AppException;
+
+    UserProfileResponse adminUpdateUserStatus(String userId, String status) throws AppException;
 }

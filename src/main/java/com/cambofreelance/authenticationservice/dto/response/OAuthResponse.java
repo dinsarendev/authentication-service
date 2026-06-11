@@ -24,5 +24,7 @@ public class OAuthResponse {
   private String tokenType;
   @JsonProperty("scope")
   private List<String> scope;
+  @JsonProperty("is_new_device")
+  private boolean newDevice;
 
 }

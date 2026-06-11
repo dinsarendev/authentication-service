@@ -2,8 +2,6 @@ package com.cambofreelance.authenticationservice.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -36,5 +34,25 @@ public class RefreshTokenEntity extends BaseEntity {
     private String userId;
     @Column(name = "CLIENT_ID")
     private String clientId;
+
+    @Column(name = "ip_address")
+    private String ipAddress;
+    @Column(name = "user_agent", columnDefinition = "TEXT")
+    private String userAgent;
+    @Column(name = "device_name")
+    private String deviceName;
+    @Column(name = "device_type")
+    private String deviceType;
+    @Column(name = "browser")
+    private String browser;
+    @Column(name = "os_name")
+    private String osName;
+    @Column(name = "last_active_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastActiveAt;
+    @Column(name = "is_trusted")
+    private boolean trusted;
+    @Column(name = "is_new_device")
+    private boolean newDevice;
 
 }

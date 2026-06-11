@@ -1,0 +1,28 @@
+package com.cambofreelance.authenticationservice.constants;
+
+public final class ArticleType {
+
+    public static final String NEWS          = "NEWS";
+    public static final String PROMOTIONS    = "PROMOTIONS";
+    public static final String BLOGS         = "BLOGS";
+    public static final String ANNOUNCEMENTS = "ANNOUNCEMENTS";
+    public static final String SERVICE       = "SERVICE";
+    public static final String TEAM          = "TEAM";
+    public static final String COURSE        = "COURSE";
+    public static final String PRODUCTS      = "PRODUCTS";
+
+    private static final String[] ALL = {
+        NEWS, PROMOTIONS, BLOGS, ANNOUNCEMENTS, SERVICE, TEAM, COURSE, PRODUCTS
+    };
+
+    public static boolean isValid(String value) {
+        if (value == null) return false;
+        String upper = value.toUpperCase();
+        for (String type : ALL) {
+            if (type.equals(upper)) return true;
+        }
+        return false;
+    }
+
+    private ArticleType() {}
+}

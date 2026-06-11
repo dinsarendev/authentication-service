@@ -8,11 +8,12 @@ import com.cambofreelance.authenticationservice.dto.response.OAuthResponse;
 import com.cambofreelance.authenticationservice.logger.exceptions.MessageResponse;
 import com.cambofreelance.authenticationservice.services.OAuthAuthenticator;
 import com.cambofreelance.authenticationservice.services.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -30,9 +31,10 @@ public class AuthController {
 
     @PostMapping("/token")
     public ResponseEntity<Object> oauthToken(@RequestBody OAuthRequest request,
-        @RequestHeader(value = Constants.CLIENT_LANG, required = false) String userLang) {
+        @RequestHeader(value = Constants.CLIENT_LANG, required = false) String userLang,
+        HttpServletRequest httpRequest) {
         log.info("Request for token is {}", request);
-        OAuthResponse response = authenticator.createToken(request);
+        OAuthResponse response = authenticator.createToken(request, httpRequest);
         MessageResponse messageResponse = new MessageResponse(response, ErrorCode.LOGIN_SUCCESS);
         return new ResponseEntity<>(messageResponse, HttpStatus.OK);
     }

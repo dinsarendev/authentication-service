@@ -1,10 +1,12 @@
 package com.cambofreelance.authenticationservice.configs;
 
 import com.cambofreelance.authenticationservice.filters.AuthTokenFilter;
+import com.cambofreelance.authenticationservice.filters.IpWhitelistFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -21,6 +23,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityConfig {
 
     private final AuthTokenFilter authTokenFilter;
+    private final IpWhitelistFilter ipWhitelistFilter;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Bean
@@ -36,11 +39,15 @@ public class SecurityConfig {
                     AntPathRequestMatcher.antMatcher("/swagger-ui/**"),
                     AntPathRequestMatcher.antMatcher("/v3/api-docs/**"),
                     AntPathRequestMatcher.antMatcher("/actuator/**"),
-                    AntPathRequestMatcher.antMatcher("/auth/openapi/swagger-ui.html")
+                    AntPathRequestMatcher.antMatcher("/auth/openapi/swagger-ui.html"),
+                    AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/articles"),
+                    AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/articles/**"),
+                    AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/media/*/view")
                 ).permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(ipWhitelistFilter, AuthTokenFilter.class)
             .exceptionHandling(ex ->
                 ex.authenticationEntryPoint(customAuthenticationEntryPoint)
             );
@@ -53,6 +60,14 @@ public class SecurityConfig {
     public FilterRegistrationBean<AuthTokenFilter> authTokenFilterRegistration(
         AuthTokenFilter filter) {
         FilterRegistrationBean<AuthTokenFilter> registration = new FilterRegistrationBean<>(filter);
+        registration.setEnabled(false);
+        return registration;
+    }
+
+    @Bean
+    public FilterRegistrationBean<IpWhitelistFilter> ipWhitelistFilterRegistration(
+        IpWhitelistFilter filter) {
+        FilterRegistrationBean<IpWhitelistFilter> registration = new FilterRegistrationBean<>(filter);
         registration.setEnabled(false);
         return registration;
     }

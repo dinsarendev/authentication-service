@@ -18,7 +18,9 @@ public class MutableHttpServletRequest extends HttpServletRequestWrapper {
     }
 
     public void putHeader(String name, String value) {
-        customHeaders.put(name, value);
+        if (name != null && value != null) {
+            customHeaders.put(name, value);
+        }
     }
 
     @Override
@@ -42,8 +44,9 @@ public class MutableHttpServletRequest extends HttpServletRequestWrapper {
 
     @Override
     public Enumeration<String> getHeaders(String name) {
-        if (customHeaders.containsKey(name)) {
-            return Collections.enumeration(List.of(customHeaders.get(name)));
+        String value = customHeaders.get(name);
+        if (value != null) {
+            return Collections.enumeration(List.of(value));
         }
         return super.getHeaders(name);
     }

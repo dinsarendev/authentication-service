@@ -4,12 +4,14 @@ import com.cambofreelance.authenticationservice.caches.TokenRedisCache;
 import com.cambofreelance.authenticationservice.constants.Constants;
 import com.cambofreelance.authenticationservice.dto.TokenCacheDto;
 import com.cambofreelance.authenticationservice.utils.JwtUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
     private final TokenRedisCache tokenRedisCache;
     private final JwtUtils jwtUtils;
+    private final ObjectMapper objectMapper;
 
     @Override
     protected void doFilterInternal(
@@ -48,7 +51,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             if (cached == null) {
                 log.warn("Access token not found in Redis (revoked or expired): {}",
                     request.getRequestURI());
-                filterChain.doFilter(request, response);
+                writeUnauthorized(response, "TOKEN_EXPIRED",
+                    "Session expired. Please refresh your token.");
                 return;
             }
 
@@ -58,13 +62,11 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             MutableHttpServletRequest mutableRequest = new MutableHttpServletRequest(request);
-            mutableRequest.putHeader(Constants.USER_ID, cached.getUserId());
-            mutableRequest.putHeader(Constants.CLIENT_USER_NAME, cached.getUsername());
-            mutableRequest.putHeader(Constants.DEVICE_ID, cached.getDeviceId());
-            mutableRequest.putHeader(Constants.APPLICATION_TYPE,
-                Optional.ofNullable(cached.getApplicationId()).orElse(""));
-            mutableRequest.putHeader(Constants.USER_TYPE,
-                Optional.ofNullable(cached.getUserType()).orElse(""));
+            mutableRequest.putHeader(Constants.USER_ID, Optional.ofNullable(cached.getUserId()).orElse(""));
+            mutableRequest.putHeader(Constants.CLIENT_USER_NAME, Optional.ofNullable(cached.getUsername()).orElse(""));
+            mutableRequest.putHeader(Constants.DEVICE_ID, Optional.ofNullable(cached.getDeviceId()).orElse(""));
+            mutableRequest.putHeader(Constants.APPLICATION_TYPE, Optional.ofNullable(cached.getApplicationId()).orElse(""));
+            mutableRequest.putHeader(Constants.USER_TYPE, Optional.ofNullable(cached.getUserType()).orElse(""));
             mutableRequest.putHeader("X-Client-Ip", extractClientIp(request));
 
             filterChain.doFilter(mutableRequest, response);
@@ -89,5 +91,18 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             return forwardedFor.split(",")[0].trim();
         }
         return Optional.ofNullable(request.getRemoteAddr()).orElse("unknown");
+    }
+
+    private void writeUnauthorized(HttpServletResponse response, String code, String message)
+        throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write(
+            objectMapper.writeValueAsString(Map.of(
+                "success", false,
+                "code",    code,
+                "message", message
+            ))
+        );
     }
 }
