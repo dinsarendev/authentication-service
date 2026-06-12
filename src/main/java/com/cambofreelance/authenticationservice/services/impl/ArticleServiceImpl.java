@@ -10,6 +10,7 @@ import com.cambofreelance.authenticationservice.entities.MediaFileEntity;
 import com.cambofreelance.authenticationservice.logger.exceptions.AppException;
 import com.cambofreelance.authenticationservice.repository.ArticleRepository;
 import com.cambofreelance.authenticationservice.repository.MediaRepository;
+import com.cambofreelance.authenticationservice.audit.Auditable;
 import com.cambofreelance.authenticationservice.services.ArticleService;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional
+    @Auditable(action = "CREATE", module = "ARTICLE")
     public ArticleResponse create(ArticleCreateRequest request, String createdBy) {
 
         String slug = ensureUniqueSlug(generateSlug(request.getTitle()), null);
@@ -65,6 +67,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional
+    @Auditable(action = "UPDATE", module = "ARTICLE", entityClass = ArticleEntity.class)
     public ArticleResponse update(String id, ArticleUpdateRequest request, String updatedBy) {
 
         ArticleEntity entity = requireById(id);
@@ -96,6 +99,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional
+    @Auditable(action = "DELETE", module = "ARTICLE", entityClass = ArticleEntity.class)
     public void delete(String id) {
         ArticleEntity entity = requireById(id);
         entity.setStatus(Constants.STATUS_DELETE);
@@ -104,6 +108,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional
+    @Auditable(action = "STATUS_CHANGE", module = "ARTICLE", entityClass = ArticleEntity.class)
     public ArticleResponse updateStatus(String id, String status, String updatedBy) {
         ArticleEntity entity = requireById(id);
 
@@ -158,6 +163,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional
+    @Auditable(action = "COPY", module = "ARTICLE")
     public ArticleResponse copy(String id, String createdBy) {
         ArticleEntity source = requireById(id);
 

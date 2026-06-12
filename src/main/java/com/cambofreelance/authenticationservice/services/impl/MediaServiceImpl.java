@@ -9,6 +9,7 @@ import com.cambofreelance.authenticationservice.entities.MediaFileEntity;
 import com.cambofreelance.authenticationservice.logger.exceptions.AppException;
 import com.cambofreelance.authenticationservice.repository.CmsSettingRepository;
 import com.cambofreelance.authenticationservice.repository.MediaRepository;
+import com.cambofreelance.authenticationservice.audit.Auditable;
 import com.cambofreelance.authenticationservice.services.MediaService;
 import com.cambofreelance.authenticationservice.services.SpacesService;
 import jakarta.transaction.Transactional;
@@ -39,6 +40,7 @@ public class MediaServiceImpl implements MediaService {
 
     @Override
     @Transactional
+    @Auditable(action = "UPLOAD", module = "MEDIA")
     public MediaPresignResponse presign(MediaPresignRequest request, String uploadedBy) {
         String originalName = request.getFileName();
         String ext = originalName.contains(".")
@@ -141,6 +143,7 @@ public class MediaServiceImpl implements MediaService {
 
     @Override
     @Transactional
+    @Auditable(action = "DELETE", module = "MEDIA")
     public void delete(String id) {
         MediaFileEntity entity = mediaRepository.findById(id)
             .filter(e -> Constants.STATUS_ACTIVE.equals(e.getStatus()))

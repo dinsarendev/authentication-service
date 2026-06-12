@@ -16,6 +16,7 @@ import com.cambofreelance.authenticationservice.dto.response.SiteStatsResponse;
 import com.cambofreelance.authenticationservice.dto.response.StorageSettingResponse;
 import com.cambofreelance.authenticationservice.entities.CmsSettingEntity;
 import com.cambofreelance.authenticationservice.repository.CmsSettingRepository;
+import com.cambofreelance.authenticationservice.audit.Auditable;
 import com.cambofreelance.authenticationservice.services.CmsSettingService;
 import com.cambofreelance.authenticationservice.services.SpacesService;
 import jakarta.transaction.Transactional;
@@ -69,6 +70,7 @@ public class CmsSettingServiceImpl implements CmsSettingService {
 
     @Override
     @Transactional
+    @Auditable(action = "UPDATE", module = "SETTINGS", description = "Updated general settings")
     public CmsGeneralSettingResponse updateGeneralSettings(CmsGeneralSettingRequest req) {
         upsert("site_name",        req.getSiteName(),        SettingGroup.GENERAL);
         upsert("environment",      req.getEnvironment(),     SettingGroup.GENERAL);
@@ -119,6 +121,7 @@ public class CmsSettingServiceImpl implements CmsSettingService {
 
     @Override
     @Transactional
+    @Auditable(action = "UPDATE", module = "SETTINGS", description = "Updated SEO settings")
     public CmsSeoSettingResponse updateSeoSettings(CmsSeoSettingRequest req) {
         upsert("seo_title",          req.getTitle(),          SettingGroup.SEO);
         upsert("seo_description",    req.getDescription(),    SettingGroup.SEO);
@@ -146,6 +149,7 @@ public class CmsSettingServiceImpl implements CmsSettingService {
 
     @Override
     @Transactional
+    @Auditable(action = "UPDATE", module = "SETTINGS", description = "Updated CDN settings")
     public CdnSettingResponse updateCdnSettings(CdnSettingRequest req) {
         upsert("cdn_enabled",       String.valueOf(req.isEnabled()), SettingGroup.CDN);
         upsert("cdn_provider",      req.getProvider(),               SettingGroup.CDN);
@@ -171,6 +175,7 @@ public class CmsSettingServiceImpl implements CmsSettingService {
 
     @Override
     @Transactional
+    @Auditable(action = "UPDATE", module = "SETTINGS", description = "Updated storage settings")
     public StorageSettingResponse updateStorageSettings(StorageSettingRequest req) {
         upsert("storage_provider",   req.getProvider(),   SettingGroup.STORAGE);
         upsert("storage_bucket",     req.getBucket(),     SettingGroup.STORAGE);
@@ -243,6 +248,7 @@ public class CmsSettingServiceImpl implements CmsSettingService {
 
     @Override
     @Transactional
+    @Auditable(action = "UPDATE", module = "SETTINGS", description = "Updated IP whitelist settings")
     public IpWhitelistResponse updateIpWhitelistSettings(IpWhitelistRequest request) {
         upsert("ip_whitelist_enabled", String.valueOf(request.isEnabled()), SettingGroup.IP_WHITELIST);
         String rulesValue = (request.getRules() != null)

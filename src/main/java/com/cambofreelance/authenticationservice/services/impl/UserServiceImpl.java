@@ -9,6 +9,9 @@ import com.cambofreelance.authenticationservice.dto.request.ChangePasswordReques
 import com.cambofreelance.authenticationservice.dto.request.OAuthRequest;
 import com.cambofreelance.authenticationservice.dto.request.UpdateProfileRequest;
 import com.cambofreelance.authenticationservice.dto.request.UserCreateRequest;
+import com.cambofreelance.authenticationservice.caches.PasswordResetCache;
+import com.cambofreelance.authenticationservice.dto.request.ForgotPasswordRequest;
+import com.cambofreelance.authenticationservice.dto.request.ResetPasswordRequest;
 import com.cambofreelance.authenticationservice.dto.request.UserRegisterRequest;
 import com.cambofreelance.authenticationservice.dto.response.RoleResponse;
 import com.cambofreelance.authenticationservice.dto.response.UserListResponse;
@@ -27,7 +30,9 @@ import com.cambofreelance.authenticationservice.logger.exceptions.AppException;
 import com.cambofreelance.authenticationservice.repository.RoleRepository;
 import com.cambofreelance.authenticationservice.repository.UserRepository;
 import com.cambofreelance.authenticationservice.services.RefreshTokenService;
+import com.cambofreelance.authenticationservice.audit.Auditable;
 import com.cambofreelance.authenticationservice.services.UserService;
+import java.security.SecureRandom;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -50,6 +55,9 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final RefreshTokenService refreshTokenService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final PasswordResetCache passwordResetCache;
+
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     @Override
     public UserEntity authUser(OAuthRequest authRequest) throws AppException {
@@ -188,6 +196,12 @@ public class UserServiceImpl implements UserService {
         userEntity.setPassword(Strings.isBlank(request.getPassword()) ? Constants.PASSWORD : bCryptPasswordEncoder.encode(request.getPassword()));
         userEntity.setPhoneNumber(request.getPhoneNumber());
         userEntity.setUserType(Constants.USER);
+
+        // Assign PUBLIC_USER role automatically on self-registration
+        roleRepository.findByCode("PUBLIC_USER").ifPresent(role -> {
+            userEntity.getRoles().add(role);
+        });
+
         userRepository.save(userEntity);
         return userEntity;
     }
@@ -223,6 +237,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Auditable(action = "PASSWORD_CHANGE", module = "USER")
     public void changePassword(String userId, ChangePasswordRequest request) throws AppException {
         UserEntity user = userRepository.findById(userId)
             .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND, "User not found"));
@@ -352,6 +367,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @Auditable(action = "CREATE", module = "USER")
     public UserProfileResponse adminCreateUser(AdminUserCreateRequest request) throws AppException {
         if (userRepository.findByUsernameAndStatus(request.getUsername(), Constants.STATUS_ACTIVE).isPresent()) {
             throw new AppException(ErrorCode.USERNAME_ALREADY_EXIST, "Username already exists");
@@ -387,6 +403,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @Auditable(action = "UPDATE", module = "USER", entityClass = UserEntity.class)
     public UserProfileResponse adminUpdateUser(String userId, AdminUserUpdateRequest request) throws AppException {
         UserEntity user = userRepository.findById(userId)
             .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND, "User not found"));
@@ -423,6 +440,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @Auditable(action = "DELETE", module = "USER", entityClass = UserEntity.class)
     public void adminDeleteUser(String userId) throws AppException {
         UserEntity user = userRepository.findById(userId)
             .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND, "User not found"));
@@ -433,6 +451,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @Auditable(action = "STATUS_CHANGE", module = "USER", entityClass = UserEntity.class)
     public UserProfileResponse adminUpdateUserStatus(String userId, String status) throws AppException {
         if (!List.of(Constants.STATUS_ACTIVE, Constants.STATUS_LEAVE, Constants.STATUS_DELETE).contains(status)) {
             throw new AppException(ErrorCode.BAD_REQUEST, "Invalid status value");
@@ -451,5 +470,48 @@ public class UserServiceImpl implements UserService {
     @Override
     public Set<String> getPermissionCodes(String userId) {
         return userRepository.findActivePermissionCodesByUserId(userId);
+    }
+
+    // ── Password reset ────────────────────────────────────────────────────────
+
+    @Override
+    public String forgotPassword(ForgotPasswordRequest request) throws AppException {
+        // Always respond the same way to prevent email enumeration.
+        // If the email doesn't exist we still return success, but don't store an OTP.
+        Optional<UserEntity> userOpt = userRepository.findByEmailAndStatus(
+            request.getEmail(), Constants.STATUS_ACTIVE);
+
+        if (userOpt.isEmpty()) {
+            // Security: don't reveal that the email doesn't exist
+            return null;
+        }
+
+        String otp = String.format("%06d", RANDOM.nextInt(1_000_000));
+        passwordResetCache.store(request.getEmail(), otp);
+        // In production, send otp via email here.
+        return otp;
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) throws AppException {
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new AppException(ErrorCode.CONFIRM_PASSWORD_NOT_MATCH, "Passwords do not match");
+        }
+
+        String stored = passwordResetCache.get(request.getEmail());
+        if (stored == null) {
+            throw new AppException(ErrorCode.OTP_EXPIRED, "Reset code has expired. Please request a new one.");
+        }
+        if (!stored.equals(request.getOtp())) {
+            throw new AppException(ErrorCode.INVALID_OTP, "Invalid reset code.");
+        }
+
+        UserEntity user = userRepository.findByEmailAndStatus(request.getEmail(), Constants.STATUS_ACTIVE)
+            .orElseThrow(() -> new AppException(ErrorCode.ACCOUNT_NOT_FOUND, "Account not found"));
+
+        user.setPassword(bCryptPasswordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+        passwordResetCache.delete(request.getEmail());
     }
 }

@@ -8,6 +8,8 @@ import com.cambofreelance.authenticationservice.dto.request.ChangePasswordReques
 import com.cambofreelance.authenticationservice.dto.request.OAuthRequest;
 import com.cambofreelance.authenticationservice.dto.request.UpdateProfileRequest;
 import com.cambofreelance.authenticationservice.dto.request.UserCreateRequest;
+import com.cambofreelance.authenticationservice.dto.request.ForgotPasswordRequest;
+import com.cambofreelance.authenticationservice.dto.request.ResetPasswordRequest;
 import com.cambofreelance.authenticationservice.dto.request.UserRegisterRequest;
 import com.cambofreelance.authenticationservice.dto.response.RoleResponse;
 import com.cambofreelance.authenticationservice.dto.response.UserListResponse;
@@ -50,4 +52,9 @@ public interface UserService {
     UserProfileResponse adminUpdateUserStatus(String userId, String status) throws AppException;
 
     Set<String> getPermissionCodes(String userId);
+
+    /** Generates a 6-digit OTP stored in Redis and returns it (dev mode — no email). */
+    String forgotPassword(ForgotPasswordRequest request) throws AppException;
+
+    void resetPassword(ResetPasswordRequest request) throws AppException;
 }

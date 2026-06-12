@@ -10,6 +10,7 @@ import com.cambofreelance.authenticationservice.entities.RoleEntity;
 import com.cambofreelance.authenticationservice.logger.exceptions.AppException;
 import com.cambofreelance.authenticationservice.repository.PermissionRepository;
 import com.cambofreelance.authenticationservice.repository.RoleRepository;
+import com.cambofreelance.authenticationservice.audit.Auditable;
 import com.cambofreelance.authenticationservice.services.RoleService;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
@@ -66,6 +67,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional
+    @Auditable(action = "CREATE", module = "ROLE")
     public RoleResponse create(RoleRequest request) {
         String code = request.getCode().trim().toUpperCase();
         if (roleRepository.existsByCodeAndStatusNot(code, Constants.STATUS_DELETE)) {
@@ -87,6 +89,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional
+    @Auditable(action = "UPDATE", module = "ROLE", entityClass = RoleEntity.class)
     public RoleResponse update(String id, RoleRequest request) {
         RoleEntity entity = findActive(id);
         String code = request.getCode().trim().toUpperCase();
@@ -109,6 +112,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional
+    @Auditable(action = "DELETE", module = "ROLE", entityClass = RoleEntity.class)
     public void delete(String id) {
         RoleEntity entity = findActive(id);
         entity.setStatus(Constants.STATUS_DELETE);
@@ -118,6 +122,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional
+    @Auditable(action = "STATUS_CHANGE", module = "ROLE", entityClass = RoleEntity.class)
     public RoleResponse toggleStatus(String id, String newStatus) {
         RoleEntity entity = findNotDeleted(id);
         if (!Constants.STATUS_ACTIVE.equals(newStatus) && !"DEA".equals(newStatus)) {
@@ -132,6 +137,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional
+    @Auditable(action = "CLONE", module = "ROLE")
     public RoleResponse clone(String id, RoleCloneRequest request) {
         RoleEntity source = findNotDeleted(id);
         String code = request.getCode().trim().toUpperCase();
@@ -154,6 +160,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional
+    @Auditable(action = "PERMISSION_ASSIGN", module = "ROLE")
     public RoleResponse assignPermissions(String id, List<String> permissionIds) {
         RoleEntity entity = findActive(id);
         entity.setPermissions(resolvePermissions(permissionIds));

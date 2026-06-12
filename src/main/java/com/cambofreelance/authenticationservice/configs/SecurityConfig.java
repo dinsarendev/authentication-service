@@ -44,7 +44,10 @@ public class SecurityConfig {
                     AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/articles/**"),
                     AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/media/*/view"),
                     AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/cms/settings/stats"),
-                    AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/cms/settings/public")
+                    AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/cms/settings/public"),
+                    AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/oauth/forgot-password"),
+                    AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/oauth/reset-password"),
+                    AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/contact")
                 ).permitAll()
                 .anyRequest().authenticated()
             )

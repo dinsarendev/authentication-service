@@ -6,6 +6,7 @@ import com.cambofreelance.authenticationservice.dto.response.ArticleTypeResponse
 import com.cambofreelance.authenticationservice.entities.ArticleTypeEntity;
 import com.cambofreelance.authenticationservice.logger.exceptions.AppException;
 import com.cambofreelance.authenticationservice.repository.ArticleTypeRepository;
+import com.cambofreelance.authenticationservice.audit.Auditable;
 import com.cambofreelance.authenticationservice.services.ArticleTypeService;
 import jakarta.transaction.Transactional;
 import java.util.Date;
@@ -32,6 +33,7 @@ public class ArticleTypeServiceImpl implements ArticleTypeService {
 
     @Override
     @Transactional
+    @Auditable(action = "CREATE", module = "ARTICLE_TYPE")
     public ArticleTypeResponse create(ArticleTypeRequest request) {
         String code = request.getCode().trim().toUpperCase();
 
@@ -55,6 +57,7 @@ public class ArticleTypeServiceImpl implements ArticleTypeService {
 
     @Override
     @Transactional
+    @Auditable(action = "UPDATE", module = "ARTICLE_TYPE", entityClass = ArticleTypeEntity.class)
     public ArticleTypeResponse update(String id, ArticleTypeRequest request) {
         ArticleTypeEntity entity = repository.findById(id)
             .filter(e -> !Constants.STATUS_DELETE.equals(e.getStatus()))
@@ -83,6 +86,7 @@ public class ArticleTypeServiceImpl implements ArticleTypeService {
 
     @Override
     @Transactional
+    @Auditable(action = "DELETE", module = "ARTICLE_TYPE", entityClass = ArticleTypeEntity.class)
     public void delete(String id) {
         ArticleTypeEntity entity = repository.findById(id)
             .filter(e -> Constants.STATUS_ACTIVE.equals(e.getStatus()))
