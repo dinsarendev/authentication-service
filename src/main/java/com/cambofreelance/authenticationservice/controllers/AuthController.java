@@ -2,7 +2,9 @@ package com.cambofreelance.authenticationservice.controllers;
 
 import com.cambofreelance.authenticationservice.constants.Constants;
 import com.cambofreelance.authenticationservice.constants.ErrorCode;
+import com.cambofreelance.authenticationservice.dto.request.ForgotPasswordRequest;
 import com.cambofreelance.authenticationservice.dto.request.OAuthRequest;
+import com.cambofreelance.authenticationservice.dto.request.ResetPasswordRequest;
 import com.cambofreelance.authenticationservice.dto.request.UserRegisterRequest;
 import com.cambofreelance.authenticationservice.dto.response.OAuthResponse;
 import com.cambofreelance.authenticationservice.logger.exceptions.MessageResponse;
@@ -46,6 +48,20 @@ public class AuthController {
         userService.registerUser(request);
         MessageResponse messageResponse = new MessageResponse("", ErrorCode.LOGIN_SUCCESS);
         return new ResponseEntity<>(messageResponse, HttpStatus.OK);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Object> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        String otp = userService.forgotPassword(request);
+        // otp is null when email not found — return same response for security
+        Object data = (otp != null) ? java.util.Map.of("otp", otp) : "";
+        return new ResponseEntity<>(new MessageResponse(data, ErrorCode.SUCCESS), HttpStatus.OK);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Object> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        userService.resetPassword(request);
+        return new ResponseEntity<>(new MessageResponse("Password reset successfully", ErrorCode.SUCCESS), HttpStatus.OK);
     }
 
     @PostMapping("/logout")

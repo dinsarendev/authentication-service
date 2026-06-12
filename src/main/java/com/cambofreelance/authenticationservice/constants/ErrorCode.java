@@ -27,4 +27,6 @@ public final class ErrorCode {
     public final static String PHONE_ALREADY_EXIST = "ERR-0008";
   public static final String UNAUTHORIZED = "ERR-00003";
     public static final String LOGIN_SUCCESS = "ERR-00007";
+    public static final String INVALID_OTP   = "ERR-0011";
+    public static final String OTP_EXPIRED   = "ERR-0012";
 }
