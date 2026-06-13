@@ -49,6 +49,13 @@ public class LoggingFilter extends OncePerRequestFilter {
         return str.length() > MAX_LOG_SIZE ? str.substring(0, MAX_LOG_SIZE) + "...[truncated]" : str;
     }
 
+    private boolean isBinaryContent(HttpServletResponse response) {
+        String ct = response.getContentType();
+        if (ct == null) return false;
+        return ct.startsWith("image/") || ct.startsWith("video/") || ct.startsWith("audio/")
+            || ct.equals("application/octet-stream") || ct.equals("application/pdf");
+    }
+
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
         @NonNull HttpServletResponse response,
@@ -91,12 +98,19 @@ public class LoggingFilter extends OncePerRequestFilter {
         } finally {
             Instant end = Instant.now();
 
-            String responseBody = truncate(getStringValue(
-                responseWrapper.getContentAsByteArray(),
-                response.getCharacterEncoding()
-            ));
+            String responseBody;
+            if (isBinaryContent(response)) {
+                int size = responseWrapper.getContentAsByteArray().length;
+                responseBody = "[binary: " + response.getContentType() + ", " + size + " bytes]";
+            } else {
+                responseBody = truncate(getStringValue(
+                    responseWrapper.getContentAsByteArray(),
+                    response.getCharacterEncoding()
+                ));
+                responseBody = LoggerUtils.maskSensitiveData(responseBody);
+            }
 
-            appLogger.setResponse(LoggerUtils.maskSensitiveData(responseBody));
+            appLogger.setResponse(responseBody);
             appLogger.setDuration(LoggerUtils.durationToTimer(start, end));
 
             if (unTrackUri.stream().noneMatch(uri::equals)) {
