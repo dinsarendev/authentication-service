@@ -142,9 +142,9 @@ public class SocialAuthService {
             .build();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private String fetchGithubPrimaryEmail(WebClient client, String accessToken) {
-        List<Map<String, Object>> emails = client.get()
+        List<Map> rawList = client.get()
             .uri("https://api.github.com/user/emails")
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
             .header(HttpHeaders.ACCEPT, "application/vnd.github+json")
@@ -153,7 +153,10 @@ public class SocialAuthService {
             .collectList()
             .block();
 
-        if (emails == null || emails.isEmpty()) {
+        List<Map<String, Object>> emails = rawList == null ? java.util.Collections.emptyList()
+            : rawList.stream().map(m -> (Map<String, Object>) m).toList();
+
+        if (emails.isEmpty()) {
             throw new AppException(ErrorCode.UNAUTHORIZED, "No verified email found in GitHub account");
         }
 
