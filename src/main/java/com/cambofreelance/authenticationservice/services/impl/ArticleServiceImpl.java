@@ -156,7 +156,8 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     @Transactional
     public ArticleResponse getBySlug(String slug) {
-        return articleRepository.findBySlugAndStatusNot(slug, Constants.STATUS_DELETE)
+        return articleRepository.findBySlugAndWorkflowStatusAndStatusNot(
+                slug, ArticleWorkflowStatus.PUBLISHED, Constants.STATUS_DELETE)
             .map(ArticleResponse::from)
             .orElseThrow(() -> notFound("slug", slug));
     }

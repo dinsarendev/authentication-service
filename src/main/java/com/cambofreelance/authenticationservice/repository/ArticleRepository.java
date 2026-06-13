@@ -18,6 +18,9 @@ public interface ArticleRepository extends JpaRepository<ArticleEntity, String> 
 
     Optional<ArticleEntity> findBySlugAndStatusNot(String slug, String status);
 
+    Optional<ArticleEntity> findBySlugAndWorkflowStatusAndStatusNot(
+        String slug, String workflowStatus, String status);
+
     @Query("""
         SELECT a FROM ArticleEntity a
         WHERE a.status != 'DEL'

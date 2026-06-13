@@ -10,9 +10,10 @@ public final class ArticleType {
     public static final String TEAM          = "TEAM";
     public static final String COURSE        = "COURSE";
     public static final String PRODUCTS      = "PRODUCTS";
+    public static final String TUTORIAL      = "TUTORIAL";
 
     private static final String[] ALL = {
-        NEWS, PROMOTIONS, BLOGS, ANNOUNCEMENTS, SERVICE, TEAM, COURSE, PRODUCTS
+        NEWS, PROMOTIONS, BLOGS, ANNOUNCEMENTS, SERVICE, TEAM, COURSE, PRODUCTS, TUTORIAL
     };
 
     public static boolean isValid(String value) {
