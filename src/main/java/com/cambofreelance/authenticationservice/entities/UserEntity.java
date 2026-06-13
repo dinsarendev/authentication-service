@@ -74,6 +74,12 @@ public class UserEntity extends BaseEntity implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date invalidOtpAt;
 
+    @Column(name = "SOCIAL_PROVIDER")
+    private String socialProvider;
+
+    @Column(name = "SOCIAL_PROVIDER_ID")
+    private String socialProviderId;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "USER_ROLES",
         joinColumns = @JoinColumn(name = "USER_ID"),

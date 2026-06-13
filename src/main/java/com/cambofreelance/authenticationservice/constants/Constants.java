@@ -64,6 +64,7 @@ public final class Constants {
     public static final String ROLE_USER = "UserEntity";
     public static final String PASSWORD = "password";
     public static final String REFRESH_TOKEN = "refresh_token";
+    public static final String SOCIAL = "social";
     public static final String USER_TYPE = "UserEntity-Type";
     public static final String DEVICE_ID = "Device-Id";
     public static final String USER_ID = "User-Id";

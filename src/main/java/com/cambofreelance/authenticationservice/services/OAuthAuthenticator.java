@@ -33,6 +33,7 @@ public class OAuthAuthenticator {
     private final TokenRedisCache tokenRedisCache;
     private final JwtUtils jwtUtils;
     private final UserService userService;
+    private final SocialAuthService socialAuthService;
     private final UserAgentParser userAgentParser;
     private final RefreshTokenRepository refreshTokenRepository;
 
@@ -125,6 +126,31 @@ public class OAuthAuthenticator {
             response.setToken(accessToken);
             response.setRefreshToken(newRefresh.getRefreshToken());
             response.setExpiresIn(issuedAt);
+
+        } else if (request.getGrantType().equals(Constants.SOCIAL)) {
+            log.info("Social login via provider: {}", request.getProvider());
+            if (request.getProvider() == null || request.getCode() == null) {
+                throw new AppException(ErrorCode.BAD_REQUEST, "provider and code are required for social login");
+            }
+
+            SocialAuthService.SocialUserInfo info = socialAuthService.fetchUserInfo(
+                request.getProvider(), request.getCode(), request.getRedirectUri());
+
+            UserEntity user = userService.findOrCreateSocialUser(info);
+
+            SessionMetadataDto metadata = buildSessionMetadata(httpRequest, true);
+
+            String accessToken = jwtUtils.generateJwtToken(user, issuedAt, request.getDeviceId());
+            RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(
+                accessToken, user.getUserId(), request.getDeviceId(), Constants.STATUS_ACTIVE, user, metadata);
+
+            TokenCacheDto dto = buildTokenCacheDto(user, request.getDeviceId());
+            tokenRedisCache.storeAccessToken(accessToken, dto, jwtExpirationMs);
+
+            response.setToken(accessToken);
+            response.setRefreshToken(refreshToken.getRefreshToken());
+            response.setExpiresIn(issuedAt);
+            response.setNewDevice(true);
 
         } else {
             log.error("Invalid grant type: {}", request.getGrantType());
