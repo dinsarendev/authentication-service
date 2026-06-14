@@ -93,4 +93,14 @@ public class ResponseCodeRedisCache {
             return null;
         }
     }
+
+    public void deleteRespCode(final String code) {
+        if (code == null) return;
+        try {
+            hashOperations.delete(key, code);
+            log.debug("Removed response code {} from cache", code);
+        } catch (DataAccessException ex) {
+            log.error("Failed to delete response code {} from Redis", code, ex);
+        }
+    }
 }

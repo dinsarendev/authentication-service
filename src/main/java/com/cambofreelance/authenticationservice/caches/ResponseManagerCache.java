@@ -31,4 +31,16 @@ public class ResponseManagerCache {
     public static void add(String key, String value) {
         generalCaches.put(key, value);
     }
+
+    public static void putRespCode(ResponseCodeDto respCode) {
+        if (respCode != null && respCode.getCode() != null) {
+            responseCodes.put(respCode.getCode(), respCode);
+        }
+    }
+
+    public static void removeRespCode(String code) {
+        if (code != null) {
+            responseCodes.remove(code);
+        }
+    }
 }

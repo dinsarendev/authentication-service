@@ -7,17 +7,16 @@ import com.cambofreelance.authenticationservice.dto.ResponseCodeDto;
 import com.cambofreelance.authenticationservice.entities.ResponseCodeEntity;
 import com.cambofreelance.authenticationservice.entities.RoleEntity;
 import com.cambofreelance.authenticationservice.entities.UserEntity;
+import com.cambofreelance.authenticationservice.repository.PermissionRepository;
 import com.cambofreelance.authenticationservice.repository.ResponseCodeRepository;
 import com.cambofreelance.authenticationservice.repository.RoleRepository;
 import com.cambofreelance.authenticationservice.repository.UserRepository;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +30,7 @@ public class ApiMigrateRegistry {
     private final ResponseCodeRedisCache responseCodeRedisCache;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final PermissionRepository permissionRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
 
@@ -73,21 +73,31 @@ public class ApiMigrateRegistry {
 
 
     private void seedUserAdmin() {
-        // Check user admin exist
         var roles = roleRepository.findAllByStatus(Constants.STATUS_ACTIVE);
-        if(!roles.isEmpty()) {
-            log.info("No roles found in the system. Please create roles before seeding admin user.");
-        }else{
-            // create roles
-            roleRepository.save(buildRole("ADMIN",        "Administrator", "lower_conversion", 1, "Administrator role with full permissions"));
-            roleRepository.save(buildRole("USER",         "User",          "lower_conversion", 2, "User role with limited permissions"));
-            roleRepository.save(buildRole("CREATOR_USER", "Creator User",  "lower_conversion", 3, "Creator User role"));
-            roleRepository.save(buildRole("PUBLIC_USER",  "Public User",   "lower_conversion", 4, "Public User role"));
+        if (!roles.isEmpty()) {
+            log.info("Roles already exist, skipping role seed.");
+        } else {
+            RoleEntity adminRole = buildRole("ADMIN",        "Administrator", "lower_conversion", 1, "Administrator role with full permissions");
+            RoleEntity userRole  = buildRole("USER",         "User",          "lower_conversion", 2, "User role with limited permissions");
+            RoleEntity creatorRole = buildRole("CREATOR_USER", "Creator User",  "lower_conversion", 3, "Creator User role");
+            RoleEntity publicRole  = buildRole("PUBLIC_USER",  "Public User",   "lower_conversion", 4, "Public User role");
+
+            // Assign all existing permissions to the ADMIN role
+            var allPermissions = new HashSet<>(permissionRepository.findAll());
+            adminRole.setPermissions(allPermissions);
+            log.info("Assigning {} permissions to ADMIN role", allPermissions.size());
+
+            roleRepository.save(adminRole);
+            roleRepository.save(userRole);
+            roleRepository.save(creatorRole);
+            roleRepository.save(publicRole);
         }
+
         var adminUserOpt = userRepository.findByUsernameAndStatus("super.admin", Constants.STATUS_ACTIVE);
-        if (adminUserOpt.isPresent()){
+        if (adminUserOpt.isPresent()) {
             return;
         }
+
         UserEntity adminUser = new UserEntity();
         adminUser.setUserId(UUID.randomUUID().toString());
         adminUser.setUsername("super.admin");
@@ -101,9 +111,8 @@ public class ApiMigrateRegistry {
         adminUser.setInvalidOtpCount(0);
         adminUser.setCreatedAt(new Date());
         adminUser.setCreatedBy("SYSTEM");
-        // Assign all roles to admin user
-        var listRoleEntity = new HashSet<>(roleRepository.findAll());
-        adminUser.setRoles(listRoleEntity);
+        // Assign all roles to the super.admin user
+        adminUser.setRoles(new HashSet<>(roleRepository.findAll()));
         userRepository.save(adminUser);
         log.info("Seeded default admin user: super.admin / Admin@123");
     }
